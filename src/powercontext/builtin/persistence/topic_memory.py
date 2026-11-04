@@ -56,6 +56,7 @@ from powercontext.builtin.persistence.tables import (
     ARTIFACTS_TABLE,
     TOPIC_MEMORY_ACTIVE_CHUNKS_TABLE,
     TOPIC_MEMORY_ACTIVE_TOPICS_TABLE,
+    TOPIC_MEMORY_LIFECYCLE_EXCLUSIONS_TABLE,
     TOPIC_MEMORY_RETRIEVAL_SHAPE_TABLE,
     TOPIC_MEMORY_REVISION_PUBLICATIONS_TABLE,
 )
@@ -489,9 +490,19 @@ class TopicMemoryRepository:
         channels = await self.index.search(connection, scope_id, request)
         await self._check_retrieval_shape(connection)
         outcome = _fuse_topic_memory_rankings(query, channels, limit, mode=used_mode, admission=admission)
+        excluded = set(
+            (
+                await connection.execute(
+                    select(TOPIC_MEMORY_LIFECYCLE_EXCLUSIONS_TABLE.c.artifact_id).where(
+                        TOPIC_MEMORY_LIFECYCLE_EXCLUSIONS_TABLE.c.scope_id == scope_id
+                    )
+                )
+            ).scalars()
+        )
+        hits = tuple(hit for hit in outcome.hits if hit.artifact_ref.artifact_id not in excluded)
         return TopicMemorySearchResult(
             mode=used_mode,
-            hits=outcome.hits,
+            hits=hits,
             admission=AdmissionCounts(
                 family=TopicMemory.family,
                 scope_id=scope_id,
