@@ -34,6 +34,7 @@ from powercontext.builtin.runtime.prepared_code import (
     PreparedCodeCandidate,
     assemble_code,
 )
+from powercontext.builtin.runtime.prepared_evidence import EvidenceSpan, select_evidence_spans
 from powercontext.builtin.runtime.prepared_text import (
     TRUST_POLICY,
     ContextTextItem,
@@ -106,6 +107,7 @@ class PreparedContextBuild:
     origins: tuple[PreparedContextOrigin, ...]
     omissions: PreparedContextOmissions = PreparedContextOmissions()
     code_origins: tuple[CodeEvidenceRef, ...] = ()
+    fragments: tuple[PreparedContextFragment, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -115,6 +117,22 @@ class MemoryEntryAddress:
     memory: ArtifactAddress
     entry_id: str
     entry_version_id: str
+
+
+@dataclass(frozen=True)
+class PreparedContextFragment:
+    """One literal span of a Memory entry, selected for the final context.
+
+    ``start`` and ``end`` are half-open character coordinates in the original
+    entry text, so ``text`` is exactly ``entry.text[start:end]``. The span keeps
+    the identity of the entry version it came from, which lets a reader resolve
+    it back through a real Memory citation.
+    """
+
+    address: MemoryEntryAddress
+    start: int
+    end: int
+    text: str
 
 
 PreparedContextOrigin = MemoryCitation | ArtifactRef | MemoryEntryAddress | ArtifactAddress
@@ -211,6 +229,12 @@ class PreparedContextBuilder:
         profile_candidates: Sequence[PreparedProfileCandidate] = (),
         code_candidates: Sequence[PreparedCodeCandidate] = (),
     ) -> PreparedContextBuild:
+        if request.evidence_selection:
+            return self._build_evidence_result(
+                request=request,
+                current_scope_id=current_scope_id,
+                memory_candidates=memory_candidates,
+            )
         if request.include_code:
 
             def historical(history_request: PrepareContextRequest, entries: int) -> PreparedContextBuild:
@@ -293,6 +317,78 @@ class PreparedContextBuilder:
             dropped_items=omissions.dropped_items,
             unused_bytes=max(0, request.max_bytes - content_bytes),
         )
+
+    def _build_evidence_result(
+        self,
+        *,
+        request: PrepareContextRequest,
+        current_scope_id: str | None,
+        memory_candidates: Sequence[PreparedMemoryCandidates],
+    ) -> PreparedContextBuild:
+        """Select literal evidence spans from Memory candidates and render them."""
+
+        entries = self._evidence_entries(memory_candidates, current_scope_id=current_scope_id)
+        if not entries:
+            return PreparedContextBuild(context=self.empty(), origins=())
+
+        def measure(spans: Sequence[EvidenceSpan]) -> int:
+            return len(_render_evidence(entries, spans).encode("utf-8"))
+
+        spans = select_evidence_spans(
+            tuple(hit.text for _, hit in entries),
+            request.query,
+            measure=measure,
+            max_bytes=request.max_bytes,
+        )
+        if not spans:
+            return PreparedContextBuild(context=self.empty(), origins=())
+
+        fragments: list[PreparedContextFragment] = []
+        origins: list[PreparedContextOrigin] = []
+        for span in spans:
+            scope_id, hit = entries[span.document_index]
+            address = MemoryEntryAddress(
+                memory=ArtifactAddress(scope_id=scope_id, artifact=hit.memory_ref),
+                entry_id=hit.entry_id,
+                entry_version_id=hit.entry_version_id,
+            )
+            fragments.append(
+                PreparedContextFragment(address=address, start=span.start, end=span.end, text=span.text)
+            )
+            origins.append(address)
+        content = _render_evidence(entries, spans)
+        content_bytes = len(content.encode("utf-8"))
+        if content_bytes > request.max_bytes:
+            raise PreparedContextInvariantError("output-budget")
+        return PreparedContextBuild(
+            context=PreparedContext(status="ready", content=content, content_bytes=content_bytes),
+            origins=tuple(origins),
+            fragments=tuple(fragments),
+        )
+
+    def _evidence_entries(
+        self,
+        memory_candidates: Sequence[PreparedMemoryCandidates],
+        *,
+        current_scope_id: str | None,
+    ) -> tuple[tuple[str, MemoryHit], ...]:
+        """Collect the candidate Memory hits that evidence selection may read."""
+
+        entries: list[tuple[str, MemoryHit]] = []
+        seen: set[tuple[str, str, str]] = set()
+        for candidates in memory_candidates:
+            scope_id = candidates.scope_id or current_scope_id or ""
+            for hit in candidates.hits:
+                if candidates.memory_ref is not None and hit.memory_ref != candidates.memory_ref:
+                    raise PreparedContextInvariantError("memory-ref-mismatch")
+                identity = (scope_id, hit.entry_id, hit.entry_version_id)
+                if identity in seen:
+                    continue
+                seen.add(identity)
+                if not hit.entry_id.strip() or not hit.entry_version_id.strip() or not hit.text.strip():
+                    continue
+                entries.append((scope_id, hit))
+        return tuple(entries)
 
     def _select_entries(
         self,
@@ -683,6 +779,33 @@ def _interleave_groups(groups: Sequence[Sequence[_Item]]) -> tuple[_Item, ...]:
     for index in range(max((len(group) for group in groups), default=0)):
         ordered.extend(group[index] for group in groups if index < len(group))
     return tuple(ordered)
+
+
+def _render_evidence(entries: Sequence[tuple[str, MemoryHit]], spans: Sequence[EvidenceSpan]) -> str:
+    """Render the selected literal spans with the standard prepared-context envelope."""
+
+    items: list[dict[str, object]] = []
+    for span in spans:
+        scope_id, hit = entries[span.document_index]
+        items.append(
+            {
+                "citation": {
+                    "scope_id": scope_id,
+                    "memory_ref": hit.memory_ref.model_dump(mode="json"),
+                    "entry_id": hit.entry_id,
+                    "entry_version_id": hit.entry_version_id,
+                },
+                "content": span.text,
+                "start": span.start,
+                "end": span.end,
+            }
+        )
+    envelope = {
+        "trust": "untrusted_history",
+        "items": items,
+    }
+    encoded = json.dumps(envelope, ensure_ascii=False, separators=(",", ":"))
+    return "\n\n".join((TRUST_POLICY, f"{_BEGIN_MARKER}\n{encoded}\n{_END_MARKER}"))
 
 
 def _render(entries: Sequence[_PreparedContextEntry]) -> str:
