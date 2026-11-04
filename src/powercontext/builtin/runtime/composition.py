@@ -140,7 +140,11 @@ from powercontext.builtin.runtime.decision_model import (
 from powercontext.builtin.runtime.family_processing import FAMILY_BINDINGS, FamilyWorkerSpec, run_family_worker
 from powercontext.builtin.runtime.memory_write_gate import build_memory_write_gate
 from powercontext.builtin.runtime.models import MemorySearchMode, RuntimeCapabilities
-from powercontext.builtin.runtime.processing_discovery import SourceProcessingPendingProvider, enabled_profile_scopes
+from powercontext.builtin.runtime.processing_discovery import (
+    SourceCountTrigger,
+    SourceProcessingPendingProvider,
+    enabled_profile_scopes,
+)
 from powercontext.builtin.runtime.processing_registry import (
     canonical_processing_manifest,
     dream_operations,
@@ -547,6 +551,16 @@ async def open_builtin_runtime(
             worker_security=worker_security,
             source_registry=configured_source_registry,
         )
+        count_thresholds = {
+            binding.binding_name: threshold
+            for binding in processing_bindings
+            if (
+                threshold := getattr(
+                    config.runtime, f"{binding.artifact_family.replace('-', '_')}_source_count_threshold", None
+                )
+            )
+            is not None
+        }
         log_safely(
             logger,
             logging.INFO,
@@ -640,6 +654,9 @@ async def open_builtin_runtime(
                 remote_skill_distribution=contexts.remote_skill_distribution(),
                 statistics_service=contexts.statistics,
                 record_service=contexts.records,
+                source_count_trigger=SourceCountTrigger(contexts.database, count_thresholds)
+                if count_thresholds
+                else None,
                 prompt_service=contexts.prompts,
                 recall_token_estimator=contexts.estimate_recall_tokens,
                 recall_effort_sink=recall_effort_sink,
@@ -770,6 +787,7 @@ def _artifact_processing_bindings(  # noqa: C901 - validate and assemble one reg
         else:
             entrypoint = partial(run_family_worker, FamilyWorkerSpec(config=config, worker_security=worker_security))
         interval = None if family == "profile" else automatic[family]
+        threshold = getattr(config.runtime, f"{prefix}_source_count_threshold", None)
         binding = canonical[family]
         configured.append(
             ArtifactProcessingBinding(
@@ -785,7 +803,9 @@ def _artifact_processing_bindings(  # noqa: C901 - validate and assemble one reg
                 timezone=config.runtime.profile_timezone if family == "profile" else "Asia/Shanghai",
                 pending_provider=None
                 if family == "skill"
-                else SourceProcessingPendingProvider(contexts.database, binding, family),
+                else SourceProcessingPendingProvider(
+                    contexts.database, binding, family, source_count_threshold=threshold
+                ),
                 automatic_scope_filter=enabled_profile_scopes if family == "profile" else None,
             )
         )

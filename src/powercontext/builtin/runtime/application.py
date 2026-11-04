@@ -221,6 +221,7 @@ from powercontext.builtin.runtime.prepared_context import (
     PreparedMemoryCandidates,
     PreparedProfileCandidate,
 )
+from powercontext.builtin.runtime.processing_discovery import SourceCountTrigger
 from powercontext.builtin.runtime.protocols import (
     BuiltinTriggers,
     PowerContextProvider,
@@ -488,6 +489,7 @@ class ScopedSourceApplication:
                             span.set_attributes({_MEMORY_CAPTURE_SOURCE_COUNT: 1})
             except BaseValueConflictError as error:
                 raise SourceConflictError("identity", error.identity) from None
+            await self._runtime._request_source_count_trigger(self.scope_id)
             return SourceReceipt(
                 source_ref=SourceRef(source_type=record.source_type, source_id=record.source_id),
                 sequence=record.position,
@@ -504,7 +506,11 @@ class ScopedSourceApplication:
                 )
                 if span is not None:
                     span.set_attributes({_MEMORY_CAPTURE_SOURCE_COUNT: 1})
-            return SourceReceipt(source_ref=context.sources.catalog.as_ref(source), sequence=sequence)
+                receipt = SourceReceipt(
+                    source_ref=context.sources.catalog.as_ref(source), sequence=sequence
+                )
+        await self._runtime._request_source_count_trigger(self.scope_id)
+        return receipt
 
 
 class SourceApplication:
@@ -531,11 +537,13 @@ class ScopedRecordApplication:
         /,
     ) -> SourceRecord:
         async with self._runtime._scope_operation(self.scope_id), self._runtime._locked(self.scope_id):
-            return await self._runtime._records().create_source(
+            record = await self._runtime._records().create_source(
                 self.scope_id,
                 source_type,
                 content,
             )
+        await self._runtime._request_source_count_trigger(self.scope_id)
+        return record
 
     async def get_source(self, source_type: str, source_id: str, /) -> SourceRecord:
         async with self._runtime._scope_operation(self.scope_id):
@@ -563,7 +571,9 @@ class ScopedRecordApplication:
         /,
     ) -> ArtifactCreated:
         async with self._runtime._scope_operation(self.scope_id), self._runtime._locked(self.scope_id):
-            return await self._runtime._records().create_artifact(self.scope_id, family, write)
+            created = await self._runtime._records().create_artifact(self.scope_id, family, write)
+        await self._runtime._request_source_count_trigger(self.scope_id)
+        return created
 
     async def get_artifact(self, family: str, artifact_id: str, /) -> ArtifactRecord:
         async with self._runtime._scope_operation(self.scope_id):
@@ -3013,6 +3023,7 @@ class BuiltinRuntime:
         remote_skill_distribution: RemoteSkillDistributionService | None = None,
         statistics_service: StatisticsServiceFactory | None = None,
         record_service: RecordService | None = None,
+        source_count_trigger: SourceCountTrigger | None = None,
         prompt_service: PromptService | None = None,
         recall_token_estimator: RecallTokenEstimator | None = None,
         recall_effort_sink: RecallEffortSink | None = None,
@@ -3069,6 +3080,7 @@ class BuiltinRuntime:
         self._remote_skill_distribution = remote_skill_distribution
         self._statistics_service = statistics_service
         self._record_service = record_service
+        self._source_count_trigger = source_count_trigger
         self._prompt_service = prompt_service
         self._recall_token_estimator = recall_token_estimator
         self._recall_effort_sink = recall_effort_sink
@@ -3397,6 +3409,42 @@ class BuiltinRuntime:
         finally:
             if acquired:
                 lock.release()
+
+    async def _request_source_count_trigger(self, scope_id: str) -> None:
+        """Publish durable invocations once unprocessed Sources reach a configured count.
+
+        Runs after the Scope write lock is released so a slow Supervisor wake
+        can never re-enter the critical section that produced the input.
+        """
+
+        trigger = self._source_count_trigger
+        if trigger is None:
+            return
+        try:
+            bindings = await trigger.request_due(scope_id)
+        except Exception as error:  # noqa: BLE001 - counting must never fail the write it follows
+            log_safely(
+                logger,
+                logging.WARNING,
+                "Source count trigger could not request processing",
+                exc_info=error,
+                extra={"event": "artifact_processing.count_trigger_failed", "scope_id": scope_id},
+            )
+            return
+        supervisor = self.artifact_processing_supervisor
+        if supervisor is None:
+            return
+        for binding_name in bindings:
+            try:
+                supervisor.wake(binding_name)
+            except Exception as error:  # noqa: BLE001 - a wake failure is retried by discovery
+                log_safely(
+                    logger,
+                    logging.WARNING,
+                    "Source count trigger could not wake processing",
+                    exc_info=error,
+                    extra={"event": "artifact_processing.count_trigger_wake_failed", "binding": binding_name},
+                )
 
     def _stage(
         self,
