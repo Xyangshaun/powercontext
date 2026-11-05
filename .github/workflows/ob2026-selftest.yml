@@ -57,6 +57,10 @@ jobs:
         id: acceptance
         shell: bash
         run: |
+          # The runner's default bash template injects `-e`, which would abort the step
+          # right after the first target whose log lacks a "N passed" line. Turn it off so
+          # every target runs and the summary stays complete.
+          set +e
           set -uo pipefail
           mkdir -p /tmp/ob2026-logs
           ORDER=(check-baseline test-pdf test-pi test-incremental test-hybrid)
