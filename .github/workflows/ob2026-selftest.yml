@@ -1,0 +1,114 @@
+name: ob2026-competition-selftest
+
+# Runs the published competition self-test on a Linux x86_64 runner, which is the only
+# platform where the pinned `pylibseekdb` wheel is available. Nothing in competition/ is
+# modified; the workflow only drives the official Makefile targets.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/ob2026-powercontext]
+    paths:
+      - ".github/workflows/ob2026-selftest.yml"
+      - "src/**"
+      - "competition/requirements.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ob2026-selftest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  selftest:
+    name: self-test (ubuntu x86_64 / Python 3.12)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up uv and Python 3.12
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: competition/requirements.txt
+
+      - name: Show toolchain
+        run: |
+          uname -m
+          command -v uv && uv --version
+          python3 -V
+
+      - name: Install locked self-test environment (make -C competition install)
+        run: make -C competition install
+
+      - name: Verify pylibseekdb import
+        run: competition/.venv/bin/python -c "import pylibseekdb; print('pylibseekdb OK')"
+
+      - name: Run acceptance targets
+        id: acceptance
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p /tmp/ob2026-logs
+          ORDER=(check-baseline test-pdf test-pi test-incremental test-hybrid)
+          FAILED=0
+
+          {
+            echo "### ob2026 self-test"
+            echo ""
+            echo "| target | result | detail |"
+            echo "| --- | --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          for target in "${ORDER[@]}"; do
+            log="/tmp/ob2026-logs/${target}.log"
+            if make -C competition "$target" >"$log" 2>&1; then
+              detail="$(grep -E '[0-9]+ passed' "$log" | tail -1)"
+              [ -z "$detail" ] && detail="$(tail -1 "$log" | cut -c1-120)"
+              echo "PASS  ${target} | ${detail}"
+              echo "| \`${target}\` | PASS | ${detail//|/\\|} |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              rc=$?
+              detail="$(grep -E '[0-9]+ (passed|failed|error)|Error|error:' "$log" | tail -2 | tr '\n' ' ' | cut -c1-120)"
+              echo "FAIL  ${target} (exit ${rc}) | ${detail}"
+              echo "| \`${target}\` | **FAIL** | ${detail//|/\\|} |" >> "$GITHUB_STEP_SUMMARY"
+              echo "---- tail of ${target} ----"
+              tail -25 "$log"
+              echo "---- end of ${target} ----"
+              FAILED=1
+            fi
+          done
+
+          {
+            echo ""
+            echo "<details><summary>log tails</summary>"
+            echo ""
+            for target in "${ORDER[@]}"; do
+              echo "#### ${target}"
+              echo ""
+              echo '```'
+              tail -15 "/tmp/ob2026-logs/${target}.log" 2>/dev/null || true
+              echo '```'
+            done
+            echo ""
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "One or more acceptance targets failed."
+            exit 1
+          fi
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ob2026-selftest-logs
+          path: /tmp/ob2026-logs
+          if-no-files-found: ignore
+          retention-days: 14
