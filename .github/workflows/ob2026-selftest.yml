@@ -29,6 +29,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # check-baseline inspects ancestry of the frozen baseline commit, so the runner
+          # needs real history rather than a shallow single-commit clone.
+          fetch-depth: 0
 
       - name: Set up uv and Python 3.12
         uses: astral-sh/setup-uv@v5
@@ -80,6 +84,11 @@ jobs:
               echo "---- tail of ${target} ----"
               tail -25 "$log"
               echo "---- end of ${target} ----"
+              # Surface the failure as an annotation so it is readable without log access.
+              echo "::error title=${target} failed (exit ${rc})::${detail}"
+              tail -6 "$log" | while IFS= read -r line; do
+                echo "::error::${target}: ${line}"
+              done
               FAILED=1
             fi
           done
