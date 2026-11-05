@@ -97,6 +97,84 @@ WHERE m.scope_id = :scope_id
 ORDER BY l2_distance(m.embedding, :query_vector) APPROXIMATE
 LIMIT :candidate_limit
 """
+_OCEANBASE_HYBRID_SEARCH_SQL = """
+WITH fts_candidates AS (
+    SELECT
+        f.memory_artifact_id,
+        f.entry_id,
+        f.entry_version_id,
+        MATCH(f.searchable_text) AGAINST (:fts_query) AS fts_score
+    FROM pc_memory_entry_heads AS f
+    WHERE f.scope_id = :scope_id
+      AND f.memory_artifact_id IN :fts_artifact_ids
+      AND MATCH(f.searchable_text) AGAINST (:fts_query)
+      /* FTS_TAG_FILTER */
+    ORDER BY fts_score DESC,
+             f.memory_artifact_id,
+             f.entry_id,
+             f.entry_version_id
+    LIMIT :fts_limit
+),
+vector_candidates AS (
+    SELECT
+        m.memory_artifact_id,
+        m.entry_id,
+        m.entry_version_id,
+        l2_distance(m.embedding, :query_vector) AS distance
+    FROM pc_memory_vector_entries AS m
+    WHERE m.scope_id = :scope_id
+      AND m.memory_artifact_id IN :vector_artifact_ids
+      /* VECTOR_TAG_FILTER */
+    ORDER BY l2_distance(m.embedding, :query_vector) APPROXIMATE
+    LIMIT :vector_limit
+)
+SELECT
+    'fts' AS hybrid_channel,
+    c.fts_score AS hybrid_fts_score,
+    NULL AS distance,
+    c.memory_artifact_id,
+    c.entry_id,
+    c.entry_version_id,
+    v.text
+FROM fts_candidates AS c
+JOIN pc_memory_entry_versions AS v
+  ON v.scope_id = :scope_id
+ AND v.memory_artifact_id = c.memory_artifact_id
+ AND v.entry_version_id = c.entry_version_id
+UNION ALL
+SELECT
+    'vector' AS hybrid_channel,
+    NULL AS hybrid_fts_score,
+    c.distance,
+    c.memory_artifact_id,
+    c.entry_id,
+    c.entry_version_id,
+    v.text
+FROM vector_candidates AS c
+JOIN pc_memory_entry_versions AS v
+  ON v.scope_id = :scope_id
+ AND v.memory_artifact_id = c.memory_artifact_id
+ AND v.entry_version_id = c.entry_version_id
+"""
+
+
+def _render_hybrid_search_sql(tagged: bool) -> str:
+    """Render the native hybrid statement, optionally with pre-limit tag filtering.
+
+    The vector branch drops ``APPROXIMATE`` when tags filter the candidates, mirroring
+    the exact (non-approximate) ordering the standalone vector strategy already uses.
+    """
+
+    if not tagged:
+        return _OCEANBASE_HYBRID_SEARCH_SQL
+    return (
+        _OCEANBASE_HYBRID_SEARCH_SQL.replace("/* FTS_TAG_FILTER */", memory_tag_sql("f"))
+        .replace("/* VECTOR_TAG_FILTER */", memory_tag_sql("m"))
+        .replace(
+            "ORDER BY l2_distance(m.embedding, :query_vector) APPROXIMATE",
+            "ORDER BY l2_distance(m.embedding, :query_vector)",
+        )
+    )
 
 
 class OceanBaseMemoryFTSIndex:
@@ -154,7 +232,9 @@ class OceanBaseMemoryFTSIndex:
         request: MemorySearchRequest,
         /,
     ) -> MemorySearchChannels:
-        if request.mode not in {"fts", "hybrid"}:
+        # Hybrid requests are served by one native statement in the vector strategy
+        # (see OceanBaseMemoryVectorIndex.search), so this strategy stays FTS-only.
+        if request.mode != "fts":
             return MemorySearchChannels()
         score = match(MEMORY_ENTRY_HEADS_TABLE.c.searchable_text, against=request.analyzed_query)
         rows = (
@@ -285,6 +365,18 @@ class OceanBaseMemoryVectorIndex:
             bindparam("tag_hashes", expanding=True),
             bindparam("query_vector", type_=VECTOR(profile.dimension)),
         )
+        self._hybrid_search_sql = text(_render_hybrid_search_sql(tagged=False)).bindparams(
+            bindparam("fts_artifact_ids", expanding=True),
+            bindparam("vector_artifact_ids", expanding=True),
+            bindparam("query_vector", type_=VECTOR(profile.dimension)),
+        )
+        self._tagged_hybrid_search_sql = text(_render_hybrid_search_sql(tagged=True)).bindparams(
+            bindparam("fts_artifact_ids", expanding=True),
+            bindparam("vector_artifact_ids", expanding=True),
+            bindparam("tag_keys", expanding=True),
+            bindparam("tag_hashes", expanding=True),
+            bindparam("query_vector", type_=VECTOR(profile.dimension)),
+        )
 
     async def initialize(self, connection: AsyncConnection, /) -> None:
         if connection.dialect.name != "mysql":
@@ -377,22 +469,79 @@ class OceanBaseMemoryVectorIndex:
             raise CapabilityNotSupportedError("embedding-profile")
         if not await self.vector_complete(connection, scope_id, request.memories, self.profile):
             raise CapabilityNotSupportedError("vector")
+        artifact_ids = tuple(memory.artifact_id for memory in request.memories)
+        query_vector = validate_embedding(
+            request.query_vector,
+            dimension=self.profile.dimension,
+        )
+        if request.mode == "hybrid":
+            return await self._native_hybrid(connection, scope_id, request, artifact_ids, query_vector)
         rows = (
             await connection.execute(
                 self._search_sql if request.tag_filter is None else self._tagged_search_sql,
                 {
                     "scope_id": scope_id,
-                    "memory_artifact_ids": tuple(memory.artifact_id for memory in request.memories),
-                    "query_vector": validate_embedding(
-                        request.query_vector,
-                        dimension=self.profile.dimension,
-                    ),
+                    "memory_artifact_ids": artifact_ids,
+                    "query_vector": query_vector,
                     "candidate_limit": request.candidate_limit,
                     **memory_tag_parameters(request.tag_filter),
                 },
             )
         ).mappings()
         return MemorySearchChannels(vector=memory_channel_hits(rows, request.memories))
+
+    async def _native_hybrid(
+        self,
+        connection: AsyncConnection,
+        scope_id: str,
+        request: MemorySearchRequest,
+        artifact_ids: tuple[str, ...],
+        query_vector: tuple[float, ...],
+        /,
+    ) -> MemorySearchChannels:
+        """Run one native statement that ranks FTS and vector candidates, then split them.
+
+        Both ranked lists are produced by the same statement so callers observe a single
+        server-side hybrid query while still fusing the two channels locally.
+        """
+
+        rows = (
+            await connection.execute(
+                self._hybrid_search_sql if request.tag_filter is None else self._tagged_hybrid_search_sql,
+                {
+                    "scope_id": scope_id,
+                    "fts_artifact_ids": artifact_ids,
+                    "vector_artifact_ids": artifact_ids,
+                    "fts_query": request.analyzed_query,
+                    "query_vector": query_vector,
+                    "fts_limit": request.candidate_limit,
+                    "vector_limit": request.candidate_limit,
+                    **memory_tag_parameters(request.tag_filter),
+                },
+            )
+        ).mappings().all()
+        fts_rows = sorted(
+            (row for row in rows if row["hybrid_channel"] == "fts"),
+            key=lambda row: (
+                -float(row["hybrid_fts_score"]),
+                str(row["memory_artifact_id"]),
+                str(row["entry_id"]),
+                str(row["entry_version_id"]),
+            ),
+        )
+        vector_rows = sorted(
+            (row for row in rows if row["hybrid_channel"] == "vector"),
+            key=lambda row: (
+                float(row["distance"]),
+                str(row["memory_artifact_id"]),
+                str(row["entry_id"]),
+                str(row["entry_version_id"]),
+            ),
+        )
+        return MemorySearchChannels(
+            fts=memory_channel_hits(fts_rows, request.memories),
+            vector=memory_channel_hits(vector_rows, request.memories),
+        )
 
     async def vector_complete(
         self,
