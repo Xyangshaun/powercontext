@@ -67,6 +67,7 @@ from powercontext.builtin.runtime.processing_contracts import (
     ArtifactProcessingWorkerOutcome,
     WorkerEntrypoint,
 )
+from powercontext.builtin.runtime.processing_discovery import SourceCountTrigger
 from powercontext.builtin.runtime.protocols import RuntimeTracing
 
 logger = logging.getLogger(__name__)
@@ -117,6 +118,10 @@ class ArtifactProcessingBinding:
     # Only automatic admission is filtered; already accepted requests retain
     # their own Worker authorization and domain completion semantics.
     automatic_scope_filter: Callable[[AsyncConnection, tuple[str, ...]], Awaitable[frozenset[str]]] | None = None
+    # Families that consume one bounded window per accepted invocation must
+    # re-evaluate the Source count condition after that window succeeds. Waves
+    # that continue inside an accepted invocation (Topic Memory) leave this off.
+    source_count_recheck: bool = False
 
     def __post_init__(self) -> None:
         if not self.binding_name or self.binding_name != self.binding_name.strip():
@@ -432,6 +437,7 @@ class ArtifactProcessingSupervisor:
         retry_cap_seconds: float = _RETRY_CAP_SECONDS,
         retry_jitter: Callable[[], float] | None = None,
         tracing: RuntimeTracing | None = None,
+        source_count_trigger: SourceCountTrigger | None = None,
     ) -> None:
         for attribute in ("binding_name", "artifact_family", "config_prefix"):
             names = [getattr(binding, attribute) for binding in bindings]
@@ -455,6 +461,7 @@ class ArtifactProcessingSupervisor:
         self._retry_cap = retry_cap_seconds
         self._jitter = retry_jitter or (lambda: SystemRandom().uniform(0.8, 1.2))
         self._tracing = tracing
+        self._source_count_trigger = source_count_trigger
         self._fence: ArtifactProcessingFence | None = None
         self._status = ArtifactProcessingSupervisorStatus.STANDBY
         self._wake = asyncio.Event()
@@ -996,6 +1003,7 @@ class ArtifactProcessingSupervisor:
                 state.completed += 1
                 if row.requested_generation > row.handled_generation:
                     self.wake(state.binding.binding_name)
+                await self._recheck_source_count(state.binding, scope)
             except (ArtifactProcessingLeadershipLostError, _WorkerTerminationError):
                 # Retain the slot until the old term is revoked and all children are reaped.
                 retain_slot = True
@@ -1015,6 +1023,36 @@ class ArtifactProcessingSupervisor:
                 if not retain_slot:
                     state.running.pop(scope, None)
                     self.wake(state.binding.binding_name)
+
+    async def _recheck_source_count(self, binding: ArtifactProcessingBinding, scope: str) -> None:
+        """Re-evaluate the count condition for the window that just succeeded.
+
+        A success advances the Family cursor, so the remaining pending count may
+        have fallen below the threshold; if it is still at or above it, the next
+        bounded window is requested. Topic Memory waves continue inside their
+        accepted invocation and therefore never reach this path.
+        """
+
+        trigger = self._source_count_trigger
+        if trigger is None or not binding.source_count_recheck:
+            return
+        try:
+            accepted = await trigger.request_due(scope, binding.binding_name)
+        except Exception as error:  # noqa: BLE001 - a count check must not fail the accepted work
+            log_safely(
+                logger,
+                logging.WARNING,
+                "Source count trigger could not re-evaluate a completed window",
+                exc_info=error,
+                extra={
+                    "event": "artifact_processing.count_trigger_failed",
+                    "scope_id": scope,
+                    "binding": binding.binding_name,
+                },
+            )
+            return
+        if accepted:
+            self.wake(binding.binding_name)
 
     async def _lose_leadership(self) -> None:
         fence, self._fence = self._fence, None

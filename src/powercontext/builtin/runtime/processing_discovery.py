@@ -106,7 +106,7 @@ class SourceCountTrigger:
         self._intents = ArtifactProcessingIntentRepository()
         self._cursors = SourceCursorRepository()
 
-    async def request_due(self, scope_id: str, /) -> tuple[str, ...]:
+    async def request_due(self, scope_id: str, /, binding_name: str | None = None) -> tuple[str, ...]:
         if not self._thresholds:
             return ()
         heads = SOURCE_JOURNAL_HEADS_TABLE
@@ -115,14 +115,16 @@ class SourceCountTrigger:
             head = int(
                 await connection.scalar(select(heads.c.position).where(heads.c.scope_id == scope_id)) or 0
             )
-            for binding_name, threshold in self._thresholds.items():
-                cursor = await self._cursors.load(connection, scope_id, binding_name)
+            for name, threshold in self._thresholds.items():
+                if binding_name is not None and name != binding_name:
+                    continue
+                cursor = await self._cursors.load(connection, scope_id, name)
                 if head - (0 if cursor is None else cursor.cursor.sequence) < threshold:
                     continue
-                intent = await self._intents.load(connection, scope_id, binding_name, for_update=True)
+                intent = await self._intents.load(connection, scope_id, name, for_update=True)
                 if intent is not None and intent.requested_generation > intent.handled_generation:
                     continue
-                await self._intents.request(connection, scope_id, binding_name)
-                accepted.append(binding_name)
+                await self._intents.request(connection, scope_id, name)
+                accepted.append(name)
         return tuple(accepted)
 

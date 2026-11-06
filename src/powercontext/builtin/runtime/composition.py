@@ -562,6 +562,7 @@ async def open_builtin_runtime(
             )
             is not None
         }
+        source_count_trigger = SourceCountTrigger(contexts.database, count_thresholds) if count_thresholds else None
         log_safely(
             logger,
             logging.INFO,
@@ -655,9 +656,7 @@ async def open_builtin_runtime(
                 remote_skill_distribution=contexts.remote_skill_distribution(),
                 statistics_service=contexts.statistics,
                 record_service=contexts.records,
-                source_count_trigger=SourceCountTrigger(contexts.database, count_thresholds)
-                if count_thresholds
-                else None,
+                source_count_trigger=source_count_trigger,
                 lifecycle_repository=SourceLifecycleRepository(contexts.database),
                 prompt_service=contexts.prompts,
                 recall_token_estimator=contexts.estimate_recall_tokens,
@@ -673,7 +672,13 @@ async def open_builtin_runtime(
             )
         )
         runtime.artifact_processing_supervisor = await resources.enter_async_context(
-            _open_artifact_processing_supervisor(config, contexts, processing_bindings, tracing=tracing)
+            _open_artifact_processing_supervisor(
+                config,
+                contexts,
+                processing_bindings,
+                tracing=tracing,
+                source_count_trigger=source_count_trigger,
+            )
         )
         contexts.profiles.operation_context = runtime._operation
         if config.handoff_report.enabled:
@@ -809,6 +814,7 @@ def _artifact_processing_bindings(  # noqa: C901 - validate and assemble one reg
                     contexts.database, binding, family, source_count_threshold=threshold
                 ),
                 automatic_scope_filter=enabled_profile_scopes if family == "profile" else None,
+                source_count_recheck=family == "memory" and threshold is not None,
             )
         )
     _validate_processing_registrations(configured)
@@ -848,6 +854,7 @@ async def _open_artifact_processing_supervisor(
     bindings: Sequence[ArtifactProcessingBinding],
     *,
     tracing: RuntimeTracing | None = None,
+    source_count_trigger: SourceCountTrigger | None = None,
 ) -> AsyncIterator[ArtifactProcessingSupervisors | None]:
     if config.runtime.artifact_processing_role == "api" or not bindings:
         yield None
@@ -869,6 +876,7 @@ async def _open_artifact_processing_supervisor(
                     leases=contexts.repositories.processing_leases,
                     binding_states=contexts.repositories.processing_binding_states,
                     tracing=tracing,
+                    source_count_trigger=source_count_trigger,
                 )
             )
             supervisors.append(supervisor)
