@@ -172,6 +172,9 @@ _HEADING_MAX_TERMS = 9
 _HEADING_WEIGHT = 6.0
 ## Very common terms still saturate long pages without discriminating between them.
 _COMMON_TERM_SHARE = 0.2
+## A single surviving rare term cannot describe the page a question refers to; keep enough
+## discriminating terms that a filing's most common query word still participates.
+_MIN_SEARCH_TERMS = 4
 
 
 def _page_term_counts(version_id: str, text: str, analyze: Any) -> tuple[int, Counter[str], Counter[str]]:
@@ -221,9 +224,18 @@ async def search_pdf_pages(memory: Any, question: str, limit: int = 10) -> tuple
     total = len(corpus)
     average_length = sum(length for _, (length, _, _) in corpus) / total or 1.0
     document_frequency = {term: sum(1 for _, (_, counts, _) in corpus if term in counts) for term in asked}
-    terms = tuple(term for term in asked if document_frequency[term] and document_frequency[term] <= total * _COMMON_TERM_SHARE)
-    if not terms:
-        terms = tuple(term for term in asked if document_frequency[term])
+    rare_terms = [
+        term
+        for term in asked
+        if document_frequency[term] and document_frequency[term] <= total * _COMMON_TERM_SHARE
+    ]
+    if len(rare_terms) < _MIN_SEARCH_TERMS:
+        remaining = sorted(
+            (term for term in asked if document_frequency[term] and term not in rare_terms),
+            key=lambda term: (document_frequency[term], term),
+        )
+        rare_terms.extend(remaining[: _MIN_SEARCH_TERMS - len(rare_terms)])
+    terms = tuple(rare_terms)
     if not terms:
         return ()
     weights = {
