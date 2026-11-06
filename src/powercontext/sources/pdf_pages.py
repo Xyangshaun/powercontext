@@ -19,6 +19,8 @@ from __future__ import annotations
 import hashlib
 import io
 import math
+import re
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
@@ -31,13 +33,11 @@ from powercontext.sources.models import Source, SourceMaterialization
 
 if TYPE_CHECKING:
     from powercontext.builtin.artifacts.memory import MemoryCitation
-    from powercontext.builtin.artifacts.memory.models import MemoryHit
 
 PDF_PAGE_SOURCE_NAME = "pdf-page"
 PDF_PAGE_SOURCE_VERSION = "1"
 
 _SEARCH_TERM_CAP = 16
-_SEARCH_CANDIDATE_LIMIT = 60
 
 
 class PDFDocumentInput(BaseModel):
@@ -164,48 +164,108 @@ class PDFPageTextEvidenceProjection:
         )
 
 
+_TERM_COUNTS: dict[str, tuple[int, Counter[str], Counter[str]]] = {}
+_FISCAL_YEAR = re.compile(r"fy(\d{4})")
+_HEADING_MAX_TERMS = 9
+## A term present in a heading usually states what the page is about, which page BM25 alone
+## under-weights on long, table-dense filings.
+_HEADING_WEIGHT = 6.0
+## Very common terms still saturate long pages without discriminating between them.
+_COMMON_TERM_SHARE = 0.2
+
+
+def _page_term_counts(version_id: str, text: str, analyze: Any) -> tuple[int, Counter[str], Counter[str]]:
+    """Tokenize one immutable entry version once, reusing the stored Analyzer v1 projection."""
+
+    cached = _TERM_COUNTS.get(version_id)
+    if cached is None:
+        terms = analyze(text).split()
+        heading_terms: list[str] = []
+        for line in text.splitlines():
+            line_terms = analyze(line).split()
+            if 0 < len(line_terms) <= _HEADING_MAX_TERMS:
+                heading_terms.extend(line_terms)
+        cached = (len(terms), Counter(terms), Counter(heading_terms))
+        _TERM_COUNTS[version_id] = cached
+    return cached
+
+
+def _question_terms(question: str, analyze_query: Any, function_words: frozenset[str]) -> tuple[str, ...]:
+    """Normalize a question to content terms, expanding fiscal-year labels the filings spell out."""
+
+    terms = [_FISCAL_YEAR.sub(r"\1", term) for term in dict.fromkeys(analyze_query(question).split())]
+    meaningful = [term for term in terms if term not in function_words]
+    return tuple((meaningful or terms)[:_SEARCH_TERM_CAP])
+
+
 async def search_pdf_pages(memory: Any, question: str, limit: int = 10) -> tuple[MemoryCitation, ...]:
-    """Rank distinct evidence pages for one natural-language question."""
+    """Rank distinct evidence pages for one natural-language question.
+
+    Score the whole scope corpus with BM25 over the same Analyzer v1 terms the stored FTS
+    projection uses, add a heading signal, then keep one citation per physical page.
+    """
 
     from powercontext.builtin.artifacts.memory import MemoryCitation
-    from powercontext.builtin.artifacts.search import analyze_fts_query
-    from powercontext.builtin.runtime import SearchMemoryRequest
+    from powercontext.builtin.artifacts.search import _QUERY_FUNCTION_WORDS, analyze_fts_query, analyze_text
 
     if limit <= 0:
         return ()
-    terms = tuple(dict.fromkeys(analyze_fts_query(question).split()))[:_SEARCH_TERM_CAP]
-    if not terms:
+    asked = _question_terms(question, analyze_fts_query, _QUERY_FUNCTION_WORDS)
+    if not asked:
+        return ()
+    entries = (await memory.list()).entries
+    if not entries:
         return ()
 
-    hits: dict[str, MemoryHit] = {}
-    matched: dict[str, set[str]] = {}
-    candidates = max(limit * 5, _SEARCH_CANDIDATE_LIMIT)
-    for term in terms:
-        page = await memory.search(SearchMemoryRequest(query=term, mode="fts", limit=candidates))
-        for hit in page.hits:
-            hits.setdefault(hit.entry_id, hit)
-            matched.setdefault(hit.entry_id, set()).add(term)
+    corpus = [(record, _page_term_counts(record.entry.entry_version_id, record.entry.text, analyze_text)) for record in entries]
+    total = len(corpus)
+    average_length = sum(length for _, (length, _, _) in corpus) / total or 1.0
+    document_frequency = {term: sum(1 for _, (_, counts, _) in corpus if term in counts) for term in asked}
+    terms = tuple(term for term in asked if document_frequency[term] and document_frequency[term] <= total * _COMMON_TERM_SHARE)
+    if not terms:
+        terms = tuple(term for term in asked if document_frequency[term])
+    if not terms:
+        return ()
+    weights = {
+        term: math.log(1 + (total - document_frequency[term] + 0.5) / (document_frequency[term] + 0.5))
+        for term in terms
+    }
+    saturation, length_weight = 1.2, 0.75
+    ranked: list[tuple[float, str, Any]] = []
+    for record, (length, counts, headings) in corpus:
+        score = 0.0
+        for term in terms:
+            frequency = counts.get(term, 0)
+            if not frequency:
+                continue
+            score += weights[term] * frequency * (saturation + 1) / (
+                frequency + saturation * (1 - length_weight + length_weight * length / average_length)
+            )
+        score += _HEADING_WEIGHT * sum(weights[term] for term in terms if term in headings)
+        if score:
+            ranked.append((-score, record.entry.entry_id, record))
+    ranked.sort(key=lambda item: (item[0], item[1]))
 
-    document_frequency = {term: sum(1 for terms_of in matched.values() if term in terms_of) for term in terms}
-    total = len(hits)
-    weights = {term: math.log(1 + total / count) for term, count in document_frequency.items() if count}
-
-    ranked = sorted(
-        hits.values(),
-        key=lambda hit: (
-            -sum(weights[term] for term in matched[hit.entry_id] if term in weights),
-            -len(matched[hit.entry_id]),
-            hit.entry_id,
-        ),
-    )
-    return tuple(
-        MemoryCitation(
-            memory_ref=hit.memory_ref,
-            entry_id=hit.entry_id,
-            entry_version_id=hit.entry_version_id,
+    citations: list[MemoryCitation] = []
+    seen_pages: set[str] = set()
+    for _, _, record in ranked:
+        page_source_id = next(
+            (reference.source_id for reference in record.entry.sources if reference.source_type == PDF_PAGE_SOURCE_NAME),
+            None,
         )
-        for hit in ranked[:limit]
-    )
+        if page_source_id is None or page_source_id in seen_pages:
+            continue
+        seen_pages.add(page_source_id)
+        citations.append(
+            MemoryCitation(
+                memory_ref=record.memory_ref,
+                entry_id=record.entry.entry_id,
+                entry_version_id=record.entry.entry_version_id,
+            )
+        )
+        if len(citations) >= limit:
+            break
+    return tuple(citations)
 
 
 PDF_PAGE_SOURCE_ADAPTER = PDFPageSourceAdapter()
