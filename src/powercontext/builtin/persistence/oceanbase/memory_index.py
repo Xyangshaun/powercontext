@@ -103,8 +103,13 @@ WITH fts_candidates AS (
         f.memory_artifact_id,
         f.entry_id,
         f.entry_version_id,
+        v.text,
         MATCH(f.searchable_text) AGAINST (:fts_query) AS fts_score
     FROM pc_memory_entry_heads AS f
+    JOIN pc_memory_entry_versions AS v
+      ON v.scope_id = f.scope_id
+     AND v.memory_artifact_id = f.memory_artifact_id
+     AND v.entry_version_id = f.entry_version_id
     WHERE f.scope_id = :scope_id
       AND f.memory_artifact_id IN :fts_artifact_ids
       AND MATCH(f.searchable_text) AGAINST (:fts_query)
@@ -120,8 +125,13 @@ vector_candidates AS (
         m.memory_artifact_id,
         m.entry_id,
         m.entry_version_id,
+        v.text,
         l2_distance(m.embedding, :query_vector) AS distance
     FROM pc_memory_vector_entries AS m
+    JOIN pc_memory_entry_versions AS v
+      ON v.scope_id = m.scope_id
+     AND v.memory_artifact_id = m.memory_artifact_id
+     AND v.entry_version_id = m.entry_version_id
     WHERE m.scope_id = :scope_id
       AND m.memory_artifact_id IN :vector_artifact_ids
       /* VECTOR_TAG_FILTER */
@@ -135,12 +145,8 @@ SELECT
     c.memory_artifact_id,
     c.entry_id,
     c.entry_version_id,
-    v.text
+    c.text
 FROM fts_candidates AS c
-JOIN pc_memory_entry_versions AS v
-  ON v.scope_id = :scope_id
- AND v.memory_artifact_id = c.memory_artifact_id
- AND v.entry_version_id = c.entry_version_id
 UNION ALL
 SELECT
     'vector' AS hybrid_channel,
@@ -149,12 +155,8 @@ SELECT
     c.memory_artifact_id,
     c.entry_id,
     c.entry_version_id,
-    v.text
+    c.text
 FROM vector_candidates AS c
-JOIN pc_memory_entry_versions AS v
-  ON v.scope_id = :scope_id
- AND v.memory_artifact_id = c.memory_artifact_id
- AND v.entry_version_id = c.entry_version_id
 """
 
 

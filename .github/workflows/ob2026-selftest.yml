@@ -25,6 +25,10 @@ jobs:
     name: self-test (ubuntu x86_64 / Python 3.12)
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      # The Makefile passes `-q`; adding `-vv` nets out to verbose so every
+      # `test_file.py::test_name PASSED` line is captured in the uploaded log.
+      PYTEST_ADDOPTS: "-vv"
 
     steps:
       - name: Checkout
@@ -63,7 +67,7 @@ jobs:
           set +e
           set -uo pipefail
           mkdir -p /tmp/ob2026-logs
-          ORDER=(check-baseline test-pdf test-pi test-incremental test-hybrid)
+          ORDER=(check-baseline test-csv test-pi test-pdf test-rerank test-incremental test-count-trigger test-embedding test-lifecycle test-evidence test-hybrid)
           FAILED=0
 
           {
