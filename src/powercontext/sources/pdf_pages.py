@@ -18,9 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import io
-import math
 import re
-from collections import Counter
 from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
@@ -164,33 +162,9 @@ class PDFPageTextEvidenceProjection:
         )
 
 
-_TERM_COUNTS: dict[str, tuple[int, Counter[str], Counter[str]]] = {}
+_PAGE_FACTS: dict[str, Any] = {}
 _FISCAL_YEAR = re.compile(r"fy(\d{4})")
-_HEADING_MAX_TERMS = 9
-## A term present in a heading usually states what the page is about, which page BM25 alone
-## under-weights on long, table-dense filings.
-_HEADING_WEIGHT = 6.0
-## Very common terms still saturate long pages without discriminating between them.
-_COMMON_TERM_SHARE = 0.2
-## A single surviving rare term cannot describe the page a question refers to; keep enough
-## discriminating terms that a filing's most common query word still participates.
-_MIN_SEARCH_TERMS = 4
-
-
-def _page_term_counts(version_id: str, text: str, analyze: Any) -> tuple[int, Counter[str], Counter[str]]:
-    """Tokenize one immutable entry version once, reusing the stored Analyzer v1 projection."""
-
-    cached = _TERM_COUNTS.get(version_id)
-    if cached is None:
-        terms = analyze(text).split()
-        heading_terms: list[str] = []
-        for line in text.splitlines():
-            line_terms = analyze(line).split()
-            if 0 < len(line_terms) <= _HEADING_MAX_TERMS:
-                heading_terms.extend(line_terms)
-        cached = (len(terms), Counter(terms), Counter(heading_terms))
-        _TERM_COUNTS[version_id] = cached
-    return cached
+_PAGE_SOURCE_ID = re.compile(r"^pdf:(.*):([0-9a-f]{64}):(\d+)$")
 
 
 def _question_terms(question: str, analyze_query: Any, function_words: frozenset[str]) -> tuple[str, ...]:
@@ -201,68 +175,82 @@ def _question_terms(question: str, analyze_query: Any, function_words: frozenset
     return tuple((meaningful or terms)[:_SEARCH_TERM_CAP])
 
 
+def _stemmed_terms(text: str) -> list[str]:
+    """Analyzer v1 terms folded to Porter stems, so inflections of one concept meet."""
+
+    from powercontext.builtin.artifacts.search import analyze_text
+    from powercontext.sources import _porter
+
+    return [_porter.stem(term) for term in analyze_text(text).split()]
+
+
+def _page_facts(record: Any) -> Any:
+    """Structure and term statistics of one page entry, cached per immutable version."""
+
+    from powercontext.sources.pdf_routing import PageFacts
+
+    version_id = record.entry.entry_version_id
+    cached = _PAGE_FACTS.get(version_id)
+    if cached is not None:
+        return cached
+    text = record.entry.text
+    document_id, _, page_text = text.partition("\n")
+    page_number = None
+    for reference in record.entry.sources:
+        if reference.source_type == PDF_PAGE_SOURCE_NAME:
+            match = _PAGE_SOURCE_ID.match(reference.source_id)
+            if match:
+                page_number = int(match.group(3))
+                break
+    facts = PageFacts(document_id.strip(), page_number or 0, page_text, _stemmed_terms)
+    _PAGE_FACTS[version_id] = facts
+    return facts
+
+
+def _router_terms(question: str, analyze_query: Any, function_words: frozenset[str]) -> tuple[str, ...]:
+    """Stem the question's content terms exactly as the page corpus is tokenized."""
+
+    from powercontext.sources import _porter
+
+    asked = _question_terms(question, analyze_query, function_words)
+    return tuple(dict.fromkeys(_porter.stem(term) for term in asked))
+
+
 async def search_pdf_pages(memory: Any, question: str, limit: int = 10) -> tuple[MemoryCitation, ...]:
     """Rank distinct evidence pages for one natural-language question.
 
-    Score the whole scope corpus with BM25 over the same Analyzer v1 terms the stored FTS
-    projection uses, add a heading signal, then keep one citation per physical page.
+    Route the question through the filing's own structure first (primary statements,
+    ITEM sections, note titles), then fall back to BM25 over the same Analyzer v1 terms
+    the stored FTS projection uses. Keep one citation per physical page.
     """
 
     from powercontext.builtin.artifacts.memory import MemoryCitation
-    from powercontext.builtin.artifacts.search import _QUERY_FUNCTION_WORDS, analyze_fts_query, analyze_text
+    from powercontext.builtin.artifacts.search import _QUERY_FUNCTION_WORDS, analyze_fts_query
+    from powercontext.sources.pdf_routing import PageRouter
 
     if limit <= 0:
         return ()
-    asked = _question_terms(question, analyze_fts_query, _QUERY_FUNCTION_WORDS)
-    if not asked:
+    terms = _router_terms(question, analyze_fts_query, _QUERY_FUNCTION_WORDS)
+    if not terms:
         return ()
     entries = (await memory.list()).entries
     if not entries:
         return ()
 
-    corpus = [(record, _page_term_counts(record.entry.entry_version_id, record.entry.text, analyze_text)) for record in entries]
-    total = len(corpus)
-    average_length = sum(length for _, (length, _, _) in corpus) / total or 1.0
-    document_frequency = {term: sum(1 for _, (_, counts, _) in corpus if term in counts) for term in asked}
-    rare_terms = [
-        term
-        for term in asked
-        if document_frequency[term] and document_frequency[term] <= total * _COMMON_TERM_SHARE
-    ]
-    if len(rare_terms) < _MIN_SEARCH_TERMS:
-        remaining = sorted(
-            (term for term in asked if document_frequency[term] and term not in rare_terms),
-            key=lambda term: (document_frequency[term], term),
-        )
-        rare_terms.extend(remaining[: _MIN_SEARCH_TERMS - len(rare_terms)])
-    terms = tuple(rare_terms)
-    if not terms:
-        return ()
-    weights = {
-        term: math.log(1 + (total - document_frequency[term] + 0.5) / (document_frequency[term] + 0.5))
-        for term in terms
-    }
-    saturation, length_weight = 1.2, 0.75
-    ranked: list[tuple[float, str, Any]] = []
-    for record, (length, counts, headings) in corpus:
-        score = 0.0
-        for term in terms:
-            frequency = counts.get(term, 0)
-            if not frequency:
-                continue
-            score += weights[term] * frequency * (saturation + 1) / (
-                frequency + saturation * (1 - length_weight + length_weight * length / average_length)
-            )
-        score += _HEADING_WEIGHT * sum(weights[term] for term in terms if term in headings)
-        if score:
-            ranked.append((-score, record.entry.entry_id, record))
-    ranked.sort(key=lambda item: (item[0], item[1]))
+    corpus = [(record, _page_facts(record)) for record in entries]
+    router = PageRouter(facts for _, facts in corpus)
+    ranked = router.rank(question, terms, limit=len(corpus))
 
     citations: list[MemoryCitation] = []
     seen_pages: set[str] = set()
-    for _, _, record in ranked:
+    for index in ranked:
+        record = corpus[index][0]
         page_source_id = next(
-            (reference.source_id for reference in record.entry.sources if reference.source_type == PDF_PAGE_SOURCE_NAME),
+            (
+                reference.source_id
+                for reference in record.entry.sources
+                if reference.source_type == PDF_PAGE_SOURCE_NAME
+            ),
             None,
         )
         if page_source_id is None or page_source_id in seen_pages:
@@ -288,10 +276,10 @@ PDF_PAGE_SOURCE_DEFINITION = AdapterSourceDefinition(
 )
 
 __all__ = [
+    "PDF_PAGE_SOURCE_DEFINITION",
     "PDFDocumentInput",
     "PDFPageInput",
     "PDFPageSource",
-    "PDF_PAGE_SOURCE_DEFINITION",
     "parse_pdf_document",
     "pdf_page_source_id",
     "search_pdf_pages",
