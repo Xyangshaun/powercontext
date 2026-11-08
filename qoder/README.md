@@ -1,6 +1,8 @@
 # Qoder 生态题交付说明
 
 > **项目网站已通过 Qoder Sites 发布，公开可访问**：<https://powercontext-9ic1smu57sb.qoder.zone>
+>
+> 访问验证：2026-11-08 用未登录的 `curl` 访问该地址返回 **HTTP 200**（75KB，页面标题「PowerContext — 让 AI 记住你的项目」）。
 
 对应赛题：`600078`（CODE 类型，20 分，除 commit/branch 外必填「作品链接」）。
 
