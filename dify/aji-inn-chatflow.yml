@@ -1,0 +1,534 @@
+app:
+  description: 一个会记仇的客栈掌柜：把玩家的恶作剧写进 PowerContext 长期记忆，换一个新会话仍能翻旧账，并在回答里给出记忆引用。
+  icon: '🏮'
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: 阿吉客栈 · 记仇掌柜
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.3.0
+workflow:
+  conversation_variables: []
+  environment_variables:
+  - description: PowerContext 服务基地址，不含 /mcp，末尾不要加斜杠，例如 https://<your-host>
+    id: env-powercontext-base-url
+    name: POWERCONTEXT_BASE_URL
+    selector:
+    - env
+    - POWERCONTEXT_BASE_URL
+    value: https://<your-powercontext-host>
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 500
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 100
+        video_file_size_limit: 500
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: 客官里边请。我是阿吉客栈的掌柜。你说过的每一件混账事，我都记在账本上——换了新会话也翻得出来。要不要试试？
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions:
+    - 记住，我把你后厨的铜锅砸了个豁口。
+    - 掌柜的，你还记得我上次干了什么吗？
+    - 我偷偷往你酒坛里兑了水。
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: http-request
+      id: 1759900000001-source-1759900000002-target
+      source: '1759900000001'
+      sourceHandle: source
+      target: '1759900000002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1759900000002-source-1759900000003-target
+      source: '1759900000002'
+      sourceHandle: source
+      target: '1759900000003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1759900000003-source-1759900000004-target
+      source: '1759900000003'
+      sourceHandle: source
+      target: '1759900000004'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: http-request
+      id: 1759900000004-source-true-1759900000005-target
+      source: '1759900000004'
+      sourceHandle: 'true'
+      target: '1759900000005'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: http-request
+      id: 1759900000005-source-1759900000006-target
+      source: '1759900000005'
+      sourceHandle: source
+      target: '1759900000006'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: http-request
+      id: 1759900000004-source-false-1759900000006-target
+      source: '1759900000004'
+      sourceHandle: 'false'
+      target: '1759900000006'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1759900000006-source-1759900000007-target
+      source: '1759900000006'
+      sourceHandle: source
+      target: '1759900000007'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: 1759900000007-source-1759900000008-target
+      source: '1759900000007'
+      sourceHandle: source
+      target: '1759900000008'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1759900000008-source-1759900000009-target
+      source: '1759900000008'
+      sourceHandle: source
+      target: '1759900000009'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables: []
+      height: 52
+      id: '1759900000001'
+      position:
+        x: 80
+        y: 320
+      positionAbsolute:
+        x: 80
+        y: 320
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        authorization:
+          type: no-auth
+        body:
+          data:
+          - key: ''
+            type: text
+            value: '{"allow_default": true}'
+          type: json
+        desc: 每次会话先解析记忆作用域；默认作用域跨会话稳定，是“换会话还记得”的前提。
+        headers: 'Content-Type: application/json'
+        method: post
+        params: ''
+        selected: false
+        title: 解析记忆作用域
+        type: http-request
+        url: '{{#env.POWERCONTEXT_BASE_URL#}}/v1/scope-bindings/resolve'
+        variables: []
+      height: 88
+      id: '1759900000002'
+      position:
+        x: 380
+        y: 320
+      positionAbsolute:
+        x: 380
+        y: 320
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        code: |
+          import json
+
+          def main(resolve_body: str, query: str) -> dict:
+              try:
+                  scope_id = json.loads(resolve_body or "{}").get("scope_id") or ""
+              except Exception:
+                  scope_id = ""
+              search_body = json.dumps(
+                  {"scope_id": scope_id, "query": query, "limit": 5, "mode": "auto"},
+                  ensure_ascii=False,
+              )
+              write_body = json.dumps(
+                  {
+                      "scope_id": scope_id,
+                      "kind": "kaizen",
+                      "text": query,
+                      "reason": "dify-explicit-remember",
+                  },
+                  ensure_ascii=False,
+              )
+              return {"scope_id": scope_id, "search_body": search_body, "write_body": write_body}
+        code_language: python3
+        desc: 从作用域响应里取出 scope_id，并拼装两条安全的 JSON 请求体（避免玩家原话中的引号破坏 JSON）。
+        outputs:
+          scope_id:
+            children: null
+            type: string
+          search_body:
+            children: null
+            type: string
+          write_body:
+            children: null
+            type: string
+        selected: false
+        title: 准备请求体
+        type: code
+        variables:
+        - value_selector:
+          - '1759900000002'
+          - body
+          variable: resolve_body
+        - value_selector:
+          - sys
+          - query
+          variable: query
+      height: 120
+      id: '1759900000003'
+      position:
+        x: 680
+        y: 320
+      positionAbsolute:
+        x: 680
+        y: 320
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: contains
+            id: 1759900000004-c1
+            value: 记住
+            varType: string
+            variable_selector:
+            - sys
+            - query
+          - comparison_operator: contains
+            id: 1759900000004-c2
+            value: 记一下
+            varType: string
+            variable_selector:
+            - sys
+            - query
+          - comparison_operator: contains
+            id: 1759900000004-c3
+            value: 记下来
+            varType: string
+            variable_selector:
+            - sys
+            - query
+          - comparison_operator: contains
+            id: 1759900000004-c4
+            value: 别忘了
+            varType: string
+            variable_selector:
+            - sys
+            - query
+          id: 'true'
+          logical_operator: or
+        desc: 只有玩家明确要求记住时才写入，避免每轮对话都污染长期记忆。
+        selected: false
+        title: 玩家是否要求记住
+        type: if-else
+      height: 140
+      id: '1759900000004'
+      position:
+        x: 980
+        y: 320
+      positionAbsolute:
+        x: 980
+        y: 320
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        authorization:
+          type: no-auth
+        body:
+          data:
+          - key: ''
+            type: text
+            value: '{{#1759900000003.write_body#}}'
+          type: json
+        desc: 把玩家原话写进 PowerContext 记忆（kind=kaizen），返回 citation 供后续核对。
+        headers: 'Content-Type: application/json'
+        method: post
+        params: ''
+        selected: false
+        title: 写入记忆
+        type: http-request
+        url: '{{#env.POWERCONTEXT_BASE_URL#}}/v1/memory/remember'
+        variables: []
+      height: 88
+      id: '1759900000005'
+      position:
+        x: 1280
+        y: 200
+      positionAbsolute:
+        x: 1280
+        y: 200
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        authorization:
+          type: no-auth
+        body:
+          data:
+          - key: ''
+            type: text
+            value: '{{#1759900000003.search_body#}}'
+          type: json
+        desc: 用玩家原话检索长期记忆（默认 5 条、自动模式）。检索为空是合法结果。
+        headers: 'Content-Type: application/json'
+        method: post
+        params: ''
+        selected: false
+        title: 召回记忆
+        type: http-request
+        url: '{{#env.POWERCONTEXT_BASE_URL#}}/v1/memory/search'
+        variables: []
+      height: 88
+      id: '1759900000006'
+      position:
+        x: 1280
+        y: 440
+      positionAbsolute:
+        x: 1280
+        y: 440
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        code: |
+          import json
+
+          def main(search_body: str) -> dict:
+              try:
+                  data = json.loads(search_body or "{}")
+              except Exception:
+                  data = {}
+              hits = data.get("hits") or []
+              lines = []
+              cites = []
+              for i, hit in enumerate(hits[:5], 1):
+                  text = (hit.get("text") or "").strip().replace("\n", " ")
+                  entry_id = (hit.get("citation") or {}).get("entry_id", "")
+                  lines.append("[%d] %s (entry_id=%s)" % (i, text, entry_id))
+                  cites.append("[%d] entry_id=%s" % (i, entry_id))
+              return {
+                  "context_text": "\n".join(lines) if lines else "（本轮没有命中任何记忆）",
+                  "citations_text": "\n".join(cites) if cites else "（本轮无记忆命中）",
+                  "hit_count": str(len(hits)),
+                  "mode": str(data.get("mode") or "unknown"),
+              }
+        code_language: python3
+        desc: 把检索结果整理成可引用的上下文与引用清单；mode/hit_count 用于核对 PowerContext 是否真的参与了这一轮。
+        outputs:
+          citations_text:
+            children: null
+            type: string
+          context_text:
+            children: null
+            type: string
+          hit_count:
+            children: null
+            type: string
+          mode:
+            children: null
+            type: string
+        selected: false
+        title: 整理命中
+        type: code
+        variables:
+        - value_selector:
+          - '1759900000006'
+          - body
+          variable: search_body
+      height: 120
+      id: '1759900000007'
+      position:
+        x: 1580
+        y: 320
+      positionAbsolute:
+        x: 1580
+        y: 320
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 只允许使用召回片段中的事实，逐条标注引用编号；无命中要明说记不得。
+        model:
+          completion_params:
+            temperature: 0.6
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - role: system
+          text: |-
+            你是「阿吉客栈」的记仇掌柜，说话古怪但友善，爱翻旧账。
+
+            你会收到「记忆片段」（来自 PowerContext 长期记忆）和玩家这一句话。
+            规则：
+            1. 只允许使用记忆片段里出现过的事实，不得编造人物、时间、金额或 entry_id。
+            2. 每用到一条记忆，就在句末标注编号，例如 [1]；不要解释编号规则。
+            3. 记忆片段为空或与问题无关时，直接说账本上没记这号事，不要猜。
+            4. 回答控制在 80 个汉字以内，口语化，可以损玩家两句但不要人身攻击。
+        - role: user
+          text: |-
+            记忆片段：
+            {{#1759900000007.context_text#}}
+
+            玩家这一句：{{#sys.query#}}
+        selected: false
+        title: 掌柜作答
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 120
+      id: '1759900000008'
+      position:
+        x: 1880
+        y: 320
+      positionAbsolute:
+        x: 1880
+        y: 320
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        answer: |-
+          {{#1759900000008.text#}}
+
+          > 本轮记忆引用（PowerContext / mode={{#1759900000007.mode#}} / hits={{#1759900000007.hit_count#}}）
+          {{#1759900000007.citations_text#}}
+        desc: ''
+        selected: false
+        title: 掌柜回话
+        type: answer
+        variables: []
+      height: 103
+      id: '1759900000009'
+      position:
+        x: 2180
+        y: 320
+      positionAbsolute:
+        x: 2180
+        y: 320
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    viewport:
+      x: 0
+      y: 0
+      zoom: 0.7
