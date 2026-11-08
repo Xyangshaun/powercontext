@@ -18,6 +18,7 @@
     "state:save": "node cli.mjs state-save",
     "state:load": "node cli.mjs state-load",
     "session": "node scripts/minimax-session.mjs",
+    "probe": "node scripts/verify-minimax.mjs",
     "test:module": "node --test test/",
     "test:demo": "node --test demo/todo/tests/"
   }

@@ -60,6 +60,13 @@ node scripts/minimax-session.mjs
 
 脚本会：seekdb 入库 → 向量检索出上下文 → 调 MiniMax 生成 `filterByStatus` → 直接应用返回代码 → 跑目标测试与回归测试 → 把完整请求/响应、`request_id`、耗时、代码差异写入 `docs/evidence/`。
 
+只想确认 Key 与本机网络可用时，跑最小探针（不写文件，只打印 `request_id`）：
+
+```bash
+export MINIMAX_API_KEY=...
+node scripts/verify-minimax.mjs     # 或 npm run probe
+```
+
 ## 已知限制（如实记录）
 
 - 检索嵌入是**本地确定性哈希嵌入**（`src/embed.mjs`，384 维），只用于 seekdb 向量召回，不是模型 embedding，也不冒充 MiniMax 能力。
