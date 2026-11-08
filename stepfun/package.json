@@ -1,0 +1,26 @@
+{
+  "name": "stepfun",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser-side embedding + seekdb hybrid retrieval demo for OceanBase competition ecosystem task 600073",
+  "scripts": {
+    "prestart": "node scripts/build-worker.mjs",
+    "start": "node server.mjs",
+    "build:corpus": "node scripts/build-corpus.mjs",
+    "build:worker": "node scripts/build-worker.mjs",
+    "benchmark:quant": "node scripts/benchmark-quant.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.2",
+    "@oceanbase/seekdb-node": "^1.4.0",
+    "mysql2": "^3.16.0",
+    "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

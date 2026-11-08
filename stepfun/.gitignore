@@ -1,0 +1,10 @@
+node_modules/
+data/seekdb/
+# 打包产物由 `npm start` 的 prestart（node scripts/build-worker.mjs）重建；
+# 入库前曾被 GitHub 推送保护误判为 Mistral API Key（实为 transformers.js 警告里的 gist ID）。
+public/embed-worker.js
+# Only the INT8 export is bundled; the FP32/FP16 baselines are fetched by
+# `npm run benchmark:quant` on demand (commands in README).
+public/models/bge-small-en-v1.5/onnx/model.onnx
+public/models/bge-small-en-v1.5/onnx/model_fp16.onnx
+.DS_Store

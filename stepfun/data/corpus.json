@@ -1,0 +1,578 @@
+[
+ {
+  "id": 1,
+  "title": "**Write. Search. Fork. The State Store for AI Agents.**",
+  "content": "MySQL-compatible · Embedded or Server · Hybrid Vector + Full-text Search · COW Sandbox ⚡ 1,523 QPS streaming write+search (10× Milvus, 3× Elasticsearch) 🌿 FORK/MERGE sandboxes for safe agent exploration 🔍 Vector + full-text + scalar in one SQL query 🐬 Full ACID, MySQL protocol, works with LangChain/LlamaIndex/Dify English | 中文版 | 日本語 30-Second Try · Quick Start · Embedded SDKs · Why seekdb · Ecosystem · Contributing If you find seekdb useful, consider giving it a star — it helps others discover the project.",
+  "source": "README.md"
+ },
+ {
+  "id": 3,
+  "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+  "content": "Agent workloads are continuous write + millisecond-later read. seekdb's async index pipeline (Change Stream) decouples DML from index build, and its two-level HNSW (incremental + snapshot) makes newly-written vectors immediately searchable. The write path commits and returns without waiting on index construction.",
+  "source": "README.md"
+ },
+ {
+  "id": 5,
+  "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+  "content": "Queries hit both delta and snapshot indexes with fine-grained read locks — this is why P99 stays flat under concurrency. The result: 1,523 QPS with 21.7 ms concurrent P99 — 10.7× the QPS of Milvus, and P99 jitter of just 1.1× when concurrency rises (vs ~10× for ES / Milvus on the same workload). Source: src/observer/change stream/ · src/observer/vector index/",
+  "source": "README.md"
+ },
+ {
+  "id": 7,
+  "title": "🌿 Copy-on-Write Sandboxes for Agent Exploration",
+  "content": "USE agent sandbox 42; INSERT INTO memory (session id, embedding, content) VALUES (...); -- Accept the work back to mainline (strategies: FAIL / THEIRS / OURS) MERGE TABLE agent sandbox 42.memory INTO agent state.memory STRATEGY THEIRS; -- ...or throw it away: DROP DATABASE agent sandbox 42; Source: tools/deploy/mysql test/test suite/fork table/",
+  "source": "README.md"
+ },
+ {
+  "id": 9,
+  "title": "🐬 MySQL-Compatible, ACID, Embeddable",
+  "content": "Built on the proven OceanBase SQL engine. Works as an embedded library, a single-node server, or in the OceanBase distributed cluster. Full ACID, real-time writes, and the entire MySQL ecosystem out of the box.",
+  "source": "README.md"
+ },
+ {
+  "id": 12,
+  "title": "Embedded use",
+  "content": "The context managers close the cursor and SQL connection before releasing the runtime handle: Run it; the result is [{'value': 1}] : Full usage guide · Supported platforms and requirements For a higher-level Collection API with text embedding and hybrid search, see pyseekdb.",
+  "source": "README.md"
+ },
+ {
+  "id": 14,
+  "title": "Embedded use",
+  "content": "The binding manages a separate local seekdb process; close SQL connections before releasing its runtime handle. Save the following as example.mjs (ES modules; TypeScript declarations are also included): javascript import { seekdb } from \"@oceanbase/seekdb-node\"; import mysql from \"mysql2/promise\"; const db = await seekdb.open(\"./seekdb.db\"); let connection; try { const endpoint = db.connectionOptions(); const location = endpoint.transport === \"tcp\" ?",
+  "source": "README.md"
+ },
+ {
+  "id": 16,
+  "title": "Embedded use",
+  "content": "endpoint.unixSocket : endpoint.namedPipe }; connection = await mysql.createConnection({ ...location, user: endpoint.user, password: \"\", database: \"test\", }); const [rows] = await connection.query(\"SELECT 1 AS value\"); console.log(rows); } finally { try { if (connection) await connection.end(); } finally { db.close(); } } bash node example.mjs Full usage guide and supported platforms For a higher-level JavaScript Collection API, see seekdb-js.",
+  "source": "README.md"
+ },
+ {
+  "id": 18,
+  "title": "Embedded use",
+  "content": "It uses the endpoint returned by ConnectionOptions and closes the SQL connections before releasing the runtime handle: Run it; Go resolves the dependencies and downloads the native bundle for your current platform.",
+  "source": "README.md"
+ },
+ {
+  "id": 21,
+  "title": "Server deployments",
+  "content": "Learn more → 🐳 Docker (Quick Testing) Please refer to the document of this docker image for details. 📦 Binary (Standalone) bash",
+  "source": "README.md"
+ },
+ {
+  "id": 23,
+  "title": "📝 More Examples",
+  "content": "Start with the runnable Python, JavaScript, and Go examples above. The following application pattern assumes an existing agent implementation. 🤖 Agent Memory Pattern (continuous write + immediate retrieval) The canonical agent loop: write an observation, retrieve relevant context milliseconds later, repeat. seekdb's async index pipeline keeps both sides fast under sustained concurrency.",
+  "source": "README.md"
+ },
+ {
+  "id": 25,
+  "title": "📚 Use Cases",
+  "content": "🎯 Agentic AI — Memory, Sandbox & State Agents need a state store that handles continuous memory writes, millisecond-later retrieval, branching for exploration, and rollback when things go wrong.",
+  "source": "README.md"
+ },
+ {
+  "id": 27,
+  "title": "📚 Use Cases",
+  "content": "Enterprise QA, customer support, industry insights, personal knowledge bases. - 🔍 Semantic Search — embedding-based search across text, images, and other modalities. Product search, text-to-image, image-to-product. - 💻 AI-Assisted Coding — semantic code search, multi-project isolation, time-travel queries for IDE plugins and code agents.",
+  "source": "README.md"
+ },
+ {
+  "id": 29,
+  "title": "🌟 Ecosystem & Integrations",
+  "content": "+ Camel-AI · DB-GPT · FastGPT · Firecrawl · Spring-AI-Alibaba · Cloudflare Workers AI · Jina AI · Ragas · Instructor · Baseten — see User Guide for the full list.",
+  "source": "README.md"
+ },
+ {
+  "id": 32,
+  "title": "Clone the repository",
+  "content": "git clone cd seekdb ./build.py init ./build.py build seekdb mkdir -p ~/seekdb/bin cp build/bin/src/observer/seekdb ~/seekdb/bin cd ~/seekdb ./bin/seekdb In this example, the working directory is $HOME/seekdb, please use a fresh directory for testing. Please see the Developer Guide for detailed instructions.",
+  "source": "README.md"
+ },
+ {
+  "id": 34,
+  "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+  "content": "The real workload of an Agent is a streaming workload — most vector databases weren't designed for it. If you're choosing a vector database for your Agent, you're probably looking at ann-benchmarks or the performance comparisons published by each vendor. Those tests run a workload like this: bulk-import all the data, build the index, then run read-only queries.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 36,
+  "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+  "content": "VectorDBBench designed its StreamingPerformanceCase specifically for this: continuous writes at a fixed rate + concurrent queries, exactly like a production Agent. VectorDBBench is maintained by Zilliz (the company behind Milvus) and is a third-party open-source benchmark framework. We used it to test 6 mainstream vector databases.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 38,
+  "title": "A Metric Everyone Ignores: How Much Does Your P99 Spike Under Concurrency?",
+  "content": "What actually determines your SLA is the concurrent P99 — and how much it spikes as concurrency increases. Look at the \"P99 Jitter\" group in the chart: - ES: 10.3x — serial P99 is only 5.2ms (faster than seekdb), but once concurrency kicks in it jumps to 53.6ms - Milvus: 9.7x — serial 15.9ms, concurrent spikes straight to 153.6ms - seekdb: 1.1x — from 19.7ms to 21.7ms, barely moves This isn't a parameter-tuning issue — it's an architecture issue.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 41,
+  "title": "Why P99 Explodes Under Streaming Workloads",
+  "content": "This is barely manageable single-threaded, but once concurrency ramps up, N segments x M query threads contend for CPU, and P99 skyrockets. Most vector databases see their segment count balloon with streaming writes, making concurrent query contention progressively worse.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 43,
+  "title": "Why P99 Explodes Under Streaming Workloads",
+  "content": "Writes and index building are physically decoupled — writes are never blocked by index construction. Second, the query path always hits exactly two indexes. seekdb maintains a delta HNSW (incremental layer, receives new writes) and a snapshot HNSW (main base layer), similar to the tiered approach of an LSM-Tree.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 45,
+  "title": "Why P99 Explodes Under Streaming Workloads",
+  "content": "After the rewrite, same product, 22x QPS improvement, P99 latency reduced by 19x — all from these two mechanisms.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 47,
+  "title": "Agents Need More Than Speed — They Need an Undo Button",
+  "content": "seekdb implements Copy-on-Write directly in the kernel: This is kernel-level COW, not application-layer snapshot/restore.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 50,
+  "title": "Hybrid Retrieval in a Single SQL Statement",
+  "content": "In seekdb, that's a single SQL statement: Vector + full-text + scalar filtering are pushed down within the same execution plan — no need to assemble multiple query results on the client side.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 52,
+  "title": "Try It in 30 Seconds",
+  "content": "python import pyseekdb client = pyseekdb.Client(path=\"./agent state.db\") memory = client.get or create collection(name=\"episodic\")",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 54,
+  "title": "Round 2: write new observation, queryable immediately after refreshing index",
+  "content": "memory.upsert(ids=[\"4\"], documents=[\"user saw pricing page 3 times today\"]) memory.refresh index() results = memory.query(query texts=\"purchase intent signals\", n results=1) print(results[\"documents\"])",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 56,
+  "title": "About seekdb",
+  "content": "seekdb is fully open source (Apache 2.0), developed by the OceanBase team. You may already be using OceanBase — it runs in production at Alipay, Taobao, DiDi, Xiaomi, and more. seekdb inherits the same storage engine and SQL executor, focused on the vector + relational hybrid workload for Agent scenarios — with 2,500+ GitHub stars since launch and integrations with LangChain / LlamaIndex / Dify / Coze and other major frameworks.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md"
+ },
+ {
+  "id": 58,
+  "title": "その Benchmark で Agent のベクトルデータベースを選ぶのは間違いだ",
+  "content": "Agent の実際の負荷は streaming workload です——ほとんどのベクトルデータベースはそのために設計されていません。 もしあなたが Agent 用のベクトルデータベースを選んでいるなら、おそらく ann-benchmarks や各社が公式に出している性能比較を参考にしているでしょう。それらのテストが実行しているのはこのような負荷です：まずデータを一括インポートし、インデックスを構築してから、読み取り専用のクエリを実行する。",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md"
+ },
+ {
+  "id": 61,
+  "title": "見落とされている指標：並行処理時に P99 はどれだけ悪化するのか？",
+  "content": "テスト条件：Cohere 10M データセット（768 次元）、16 vCPU / 64 GiB、統一 HNSW インデックスパラメータ（M=16 / ef construction=256 / ef search=200）、継続的に 500 行/秒で書き込み。",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md"
+ },
+ {
+  "id": 63,
+  "title": "なぜ streaming 負荷で P99 が爆発するのか",
+  "content": "Milvus、ES、Qdrant はそれぞれが得意とするシナリオ（一括インポート + 読み取り専用クエリ）では優れたパフォーマンスを発揮します——もともとそのシナリオのために設計されているからです。しかし streaming 書き込みは構造的な問題を露呈させます：新しい segment が次々と生成されるのです。クエリ時には N 個の segment それぞれに対して fanout して knn を実行し、結果をマージする必要があります。シングルスレッドであればなんとか制御可能ですが、 並行度が上がると、N 個の segment × M 個のクエリスレッドが CPU 上で互いに競合し、P99 が急上昇します。 ほとんどのベクトルデータベースでは、streaming 書き込みに伴いインデックスの segment 数が膨張し、並行クエリの競合が悪化し続けます。seekdb のインデックス数は固定です（常に 2 つだけ）ので、この問題は発生しません。 具体的には、seekdb v1.3.0 は streaming 負荷のために 2 つのメカニズムを設計しました： 第一に、書き込みパスはインデックスに触れません。 トランザクションのコミット後は redo log を書くだけで即座に返します。独立した Change Stream パイプラインがバックグラウンドで非同期に redo log を消費し、ベクトルをメモリ上の delta HNSW インデックスに書き込みます。書き込みとインデックス構築は物理的に完全に分離されており——書き込みがインデックス構築によってブロックされることはありません。",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md"
+ },
+ {
+  "id": 65,
+  "title": "Agent に必要なのは速さだけではない——「やり直し」の仕組みも必要",
+  "content": "パフォーマンスについては説明しました。しかし Agent を開発したことがある方なら、もう一つの課題をご存知でしょう：Agent は試行錯誤的にデータを変更する必要があります（memory の書き換え、実験の実行、テーブルの破壊的変更など）。 安全なサンドボックスとロールバックの仕組みが必要です。 ほとんどのベクトルデータベースにはこの概念がありません。seekdb はカーネルレベルで Copy-on-Write を実装しています： これはカーネルレベルの COW であり、アプリケーション層の snapshot/restore ではありません。fork は秒単位で完了し、データのコピーは行わず、各サンドボックスは完全に書き込み可能なデータベースです（テーブル構造、ベクトルインデックス、自動インクリメントカラムすべてが正常に動作します）。3 つのコンフリクト戦略（ FAIL / THEIRS / OURS ）により、Agent の変更をどこまで信頼するかを精密に制御できます。 FORK DATABASE と FORK TABLE の 2 つの粒度をサポートしています。",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md"
+ },
+ {
+  "id": 67,
+  "title": "-> [['user saw pricing page 3 times today']]",
+  "content": "サーバー不要、スキーマ不要、組み込みモードでプロセス内で動作します。書き込みは非同期インデックスパイプラインを通ります（サーバーモードと同じアーキテクチャ）。即座にクエリする必要がある場合は refresh index() を一度呼び出してインデックスの準備を確認してください。サーバーモードや分散モードへの切り替えは接続パラメータを 1 行変更するだけです。Cloud でインストール不要のお試しもできます（登録不要、7 日間無料、curl 一発）。",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md"
+ },
+ {
+  "id": 70,
+  "title": "Build and run seekdb on Android",
+  "content": "Cross-compile seekdb for Android arm64-v8a on macOS, then deploy it to an emulator or physical device.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/android.md"
+ },
+ {
+  "id": 72,
+  "title": "Build",
+  "content": "Set the installed NDK path, initialize Android dependencies, then build with Bazel: init --android prepares host tools in deps/3rd and Android dependencies in deps/android , and installs the Android target for the pinned Rust toolchain. Native and Android builds can share one checkout.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/android.md"
+ },
+ {
+  "id": 74,
+  "title": "Allocator",
+  "content": "Android builds use the bundled, statically linked jemalloc through SeekDB's explicit allocator interfaces. The build sets jemalloc's page size to 16 KiB and disables initial-exec TLS so the allocator can also be used in a loaded library. Host libc allocations keep their own allocation and release APIs. Server startup configures decay through je mallctl for new arenas and arena 0, then enables background workers before the logger starts its workers.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/android.md"
+ },
+ {
+  "id": 76,
+  "title": "Start and connect",
+  "content": "Choose resource values that fit the device: Forward the SQL port and connect: Inspect logs and stop the process with:",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/android.md"
+ },
+ {
+  "id": 79,
+  "title": "Build the production binary",
+  "content": "Put all options after the command, including Bazel startup options such as --batch and --bazelrc . build.py reads the installed Bazel's option definitions on each invocation and moves startup options before the command internally. Keep Bazel's original option names, including underscores. On Windows, use python build.py with the same commands. For C++ test targets, see Write and run unit tests.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 81,
+  "title": "Rust build declarations",
+  "content": "Use rust/logger/BUILD.bazel as a small example, or rust/config/BUILD.bazel for generated inputs. Add a module that belongs in the final archive to rust/seekdb-rust's Cargo.toml, BUILD.bazel, and src/lib.rs. CXX interfaces are registered in rust/modules.bzl, which also collects bridge objects for the final C++ link. Share feature constants between a Rust target and its CXX generator when needed, as sql-nio does.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 83,
+  "title": "Set build concurrency",
+  "content": "Bazel defaults to the available host CPU count. When you explicitly set local build concurrency, build.py sets both the job limit and the local CPU scheduling budget: -j32 , -j 32 , and --jobs=32 are equivalent. Only explicit numeric command-line values are synchronized; omitting the option preserves Bazel's automatic defaults. An explicit --local resources=cpu=N overrides this budget. Memory settings are unaffected.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 85,
+  "title": "Use remote C++ compilation",
+  "content": "Specify your REAPI service address and concurrency: The default strategies in .bazelrc prefer remote execution for C++ compilation and use local execution when no remote executor is configured. Set --remote executor without adding --config=remote . Rust compilation, generators, and linking run locally.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 87,
+  "title": "Use remote C++ compilation",
+  "content": "Bazel still detects the local CPU budget automatically unless you set it separately with --local resources=cpu=N .",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 90,
+  "title": "Build directories",
+  "content": "For example, ./build.py build -o build3 seekdb uses build3/ as the working directory and build3/bin/src/observer/seekdb as the binary path. Relative paths are resolved from the project root; absolute paths can place builds on another disk. Different directories have independent build state and links and can build concurrently. Bazel serializes commands using the same directory.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 92,
+  "title": "Reuse build caches",
+  "content": "Bazel binaries and the default action cache are shared between checkouts. Their base directory is ~/.cache/bazel on Linux, ~/Library/Caches/bazel on macOS, or %LOCALAPPDATA%/bazel on Windows. Linux honors XDG CACHE HOME . Bazel manages its shared repository download cache separately. Use --launcher cache dir PATH for the Bazel binary cache, --disk cache=PATH for build actions, or --repository cache=PATH for downloaded dependencies. All go after the command.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 94,
+  "title": "Build for another platform",
+  "content": "Use the seekdb target on every platform. Select a platform with --config=android , --config=ios , --config=ios-simulator , or --config=wasm ; without a platform configuration, the target builds the native program. Follow the Android, iOS, or WebAssembly guide to prepare dependencies. Android builds a server program, iOS builds a framework, and WebAssembly builds an engine and SQL shell.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 96,
+  "title": "Maintain build declarations",
+  "content": "| | bazel/compile config.bzl | Common compiler options and Sanity instrumentation settings. | | bazel/build settings.bzl , bazel/BUILD.bazel | Custom setting types and shared flag declarations. | | A package's BUILD.bazel | Targets, headers, explicit dependencies, and visibility. | For C++ libraries, load cc library , unity cc library , or grouped unity cc library from //bazel:defs.bzl . cc library compiles each source separately.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 99,
+  "title": "Maintain build declarations",
+  "content": "The Unity helpers call these attributes public hdrs and private hdrs . - Add dependencies used by public headers to deps . Put dependencies used only by implementation files in implementation deps . Set visibility to the intended consumers. Dependencies are maintained explicitly; there is no include scanner that generates them. Build the affected target with ./build.py build //package:target .",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 101,
+  "title": "Run a local instance",
+  "content": "Pass repeated --parameter key=value options to start when you need server settings. start returns after spawning the process; wait-ready checks the managed process and waits for SELECT 1 to succeed.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 103,
+  "title": "Stop or remove the local instance",
+  "content": "Stop the instance and keep its data: Run the same start and wait-ready commands to restart it. To stop it and delete this example's data instead: destroy removes the entire managed instance directory. Only use it for disposable data.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md"
+ },
+ {
+  "id": 105,
+  "title": "Contribute to seekdb",
+  "content": "The canonical contribution workflow is maintained in the repository root CONTRIBUTING.md. It covers preparing a fork, branching from master , building and testing, staging focused changes, and opening a pull request.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/contributing.md"
+ },
+ {
+  "id": 108,
+  "title": "Set up Homebrew mirrors",
+  "content": "If you experience slow downloads with Homebrew, you can configure mirrors to accelerate the process.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/homebrew.md"
+ },
+ {
+  "id": 110,
+  "title": "Build seekdb for iOS",
+  "content": "Cross-compile seekdb on an Apple Silicon Mac into SeekDB.framework , a dynamic framework that runs the engine inside an iOS app, for arm64 devices or the arm64 simulator. An iOS app cannot start another process, so apps embed the framework.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/ios.md"
+ },
+ {
+  "id": 112,
+  "title": "Build",
+  "content": "Initialize the dependencies, then build the arm64 device framework with Bazel: init --ios prepares the host tools and Rust iOS target, and builds the base libraries into deps/ios/iphoneos/devel . Bazel builds the remaining pinned source dependencies through //bazel/sdk sources:source sdk .",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/ios.md"
+ },
+ {
+  "id": 114,
+  "title": "Build",
+  "content": "Both configurations compile the engine directly with the Apple C++ toolchain and disable physical standby support.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/ios.md"
+ },
+ {
+  "id": 116,
+  "title": "Framework contents",
+  "content": "- SeekDB : the engine, its Rust libraries and third-party libraries linked into one arm64 dynamic library that depends only on system libraries - Headers/seekdb.h : seekdb open , seekdb last open error , seekdb close and seekdb connection options , with the same declarations as the desktop seekdb.h - Info.plist : source revision, platform and minimum OS version - build-manifest.json , rust-Cargo.lock , and Licenses.tar : linked archive hashes, dependency source records, and license notices The device and simulator frameworks are not interchangeable.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/ios.md"
+ },
+ {
+  "id": 119,
+  "title": "Use it in an app",
+  "content": "/ / seekdb close releases the handle; the engine keeps running until the app exits. / seekdb close(db); } else { fprintf(stderr, \"%s\\n\", seekdb last open error()); } - Pass an absolute directory inside the app container. A new database defaults to memory budget=1G , vector memory limit=128M , log disk size=2G and datafile maxsize=20G ; key/value pairs override them when the database is created.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/ios.md"
+ },
+ {
+  "id": 121,
+  "title": "Use it in an app",
+  "content": "- The engine sets the process working directory to its data directory and leaves it there, so use absolute paths. Keep the framework loaded until the process exits.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/ios.md"
+ },
+ {
+  "id": 123,
+  "title": "Prepare the binaries",
+  "content": "Follow Build and run to prepare dependencies and build seekdb: The default executables are build/bin/src/observer/seekdb , deps/3rd/u01/obclient/bin/obclient , and deps/3rd/u01/obclient/bin/mysqltest . Override them with --seekdb , --obclient , and --mysqltest when using another build or client installation.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/mysqltest.md"
+ },
+ {
+  "id": 125,
+  "title": "Select and run cases",
+  "content": "--base-dir must be a dedicated disposable directory: the runner destroys the managed instance before the run and again when it finishes. It refuses to adopt a non-empty directory it does not manage. Use sdb.py from Build and run for instances whose data you want to retain. Replace --test-set expr.expr ceil with --suite expr to run a suite, or omit both options to run all enabled cases. Both options accept comma-separated values and may be repeated.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/mysqltest.md"
+ },
+ {
+  "id": 128,
+  "title": "Output and CI slices",
+  "content": "The runner initializes the test database and users, invokes the mysqltest binary, and exits nonzero if a case or infrastructure step fails. Results are written to --work-dir/seekdb result.json ; client logs and failure diagnostics are saved under the same work directory. Instance data is removed after the run. | Option | Meaning | | --- | --- | | --suite , --test-set | Select suites or cases; omitted means all enabled cases.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/mysqltest.md"
+ },
+ {
+  "id": 130,
+  "title": "Output and CI slices",
+  "content": "Merge slice results with python3 tools/deploy/mysqltest.py merge --help for the required arguments.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/mysqltest.md"
+ },
+ {
+  "id": 132,
+  "title": "1. Keep dependencies directed from C++ to Rust by default",
+  "content": "Keep Rust core modules independent and concentrate cross-language adaptation at their boundaries. Prefer explicit inputs, returned results, and orchestration by callers to connect the two languages. Use cross-language callbacks or interface injection when needed. Do not add queues, event protocols, or extra threads solely to avoid callbacks.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md"
+ },
+ {
+  "id": 134,
+  "title": "2. Design native interfaces for Rust callers and use CXX for compatibility",
+  "content": "Design natural Rust types, ownership, and error models first. Then adapt existing C++ types, error codes, and calling conventions. CXX representation constraints should not determine the core interface. Rust callers must be able to use the full capability through native interfaces without constructing bridge objects or following C++ compatibility conventions. Use the repository's existing CXX bridges and build integration for interoperability in both directions.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md"
+ },
+ {
+  "id": 136,
+  "title": "3. Pass business state explicitly and allow appropriate infrastructure access",
+  "content": "Give context that affects business correctness an explicit owner and pass it through parameters or handles. Each module receives only the state and capabilities it needs. Avoid hiding dependencies in an all-purpose context object. A global entry point can be appropriate for cross-cutting infrastructure with process-wide semantics that needs no isolation per request or instance, such as a logger.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md"
+ },
+ {
+  "id": 139,
+  "title": "5. Migrate complete responsibilities and preserve module cohesion",
+  "content": "Check whether adjacent state management, validation, resource management, error handling, and platform adaptation should move into Rust together. Avoid moving only low-level functions while leaving most complexity in C++. Choose scope by responsibility and dependencies rather than migrated line count. Organize modules around state ownership, invariants, and reasons to change together. Do not mechanically reproduce C++ classes, files, or inheritance hierarchies.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md"
+ },
+ {
+  "id": 141,
+  "title": "6. Redesign around behavior contracts",
+  "content": "Before choosing data structures or execution mechanisms, identify the behavior callers need and the invariants the implementation must preserve. Redesign internals when useful rather than translating line by line. For each task, define compatibility requirements for external behavior, data formats, durability, and recovery.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md"
+ },
+ {
+  "id": 143,
+  "title": "7. Express valid states through types and ownership",
+  "content": "Use domain types, enums, and handles with explicit lifetimes to express important states. Reduce invalid combinations and implicit call ordering. Parse and validate external input at boundaries. Use types that carry established constraints in internal interfaces. Keep resources alive until their actual users finish. Logical completion, cancellation, or timeout does not imply that background work has stopped.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md"
+ },
+ {
+  "id": 145,
+  "title": "8. Define concurrency protocols before choosing synchronization mechanisms",
+  "content": "Define who can mutate state, when an operation is accepted, how results are published, and how cancellation and shutdown finish. Reduce shared mutable state before choosing locks, atomics, or message passing. Different modules may use different concurrency models. When introducing queues or background work, define capacity, backpressure, and resource limits.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md"
+ },
+ {
+  "id": 148,
+  "title": "9. Switch production callers and remove replaced implementations",
+  "content": "Maintain necessary long-term interfaces through clear contracts. An adapter or callback does not by itself make a design temporary.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md"
+ },
+ {
+  "id": 150,
+  "title": "10. Validate behavior according to risk",
+  "content": "Distinguish unsupported capabilities from actual failures. Compilation alone does not prove that a migration is complete. For performance-sensitive paths, compare the baseline and new implementation with equivalent semantics and workloads. Report the results, environment, and coverage gaps. Do not hide regressions by reducing functionality.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md"
+ },
+ {
+  "id": 152,
+  "title": "Task deliverables",
+  "content": "When departing from a default principle, explain the specific constraint, impact, and scope. Do not turn an exception into the default for unrelated modules.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md"
+ },
+ {
+  "id": 154,
+  "title": "Rust",
+  "content": "./build.py init installs rustup if needed, then prepares the toolchain, components, and targets declared in rust-toolchain.toml . The repository pins Rust 1.98.1 . Run init before the first build and after changing the toolchain file. Downloads and installation logs are shown in the terminal; build reports a missing toolchain and asks you to run init . Native init requires only the host Rust standard library and clippy.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/toolchain.md"
+ },
+ {
+  "id": 157,
+  "title": "Rust",
+  "content": "The build script downloads locked Cargo dependencies through the RsProxy sparse registry, overriding the user's crates.io source selection for this step. Downloads reuse the existing Cargo cache ( CARGO HOME , or ~/.cargo by default).",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/toolchain.md"
+ },
+ {
+  "id": 159,
+  "title": "Host detection and supported architectures",
+  "content": "| Architecture | Recognized Linux families | | --- | --- | | x86 64 | RHEL, CentOS, AlmaLinux, Rocky Linux, Alibaba Cloud Linux/AliOS, Anolis OS, TencentOS, Ubuntu, Debian, Fedora, Kylin, openEuler, openSUSE Leap, SLES, and UOS | | aarch64 | RHEL, CentOS, AlmaLinux, Rocky Linux, Alibaba Cloud Linux/AliOS, Anolis OS, Ubuntu, Debian, Kylin, and openEuler | Do not infer aarch64 support for Fedora, openSUSE/SLES, UOS, or TencentOS from the x86 64 list; those hosts are not selected by the current aarch64 dependency branch.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/toolchain.md"
+ },
+ {
+  "id": 161,
+  "title": "Windows host packages",
+  "content": "Install Python 3 and Visual Studio 2022 Build Tools with the Desktop development with C++ workload. The project dependency SDK includes LLVM 18.1.8; no separate LLVM installation is needed. The bundled jemalloc build also requires a POSIX shell, core utilities (including chmod ), awk , grep , sed , and GNU Make. A full Git for Windows installation provides the shell and most utilities; minimal Git distributions may omit required commands.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/toolchain.md"
+ },
+ {
+  "id": 163,
+  "title": "Windows host packages",
+  "content": "Open x64 Native Tools Command Prompt for VS 2022 in the repository root, check that the build utilities are available, then initialize the parser tools and dependency SDK: build.py selects clang-cl from deps\\3rd\\tools\\llvm18 . The executable is build\\bin\\src\\observer\\seekdb\\seekdb.exe .",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/toolchain.md"
+ },
+ {
+  "id": 165,
+  "title": "Windows host packages",
+  "content": "The DLLs required by the executable are emitted in the same directory, including the MSVC runtime. Packaging consumes this build output; it does not search the dependency SDK for server DLLs. .NET 8 and WiX v4 are optional and are required only for the configurator and MSI packaging path.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/toolchain.md"
+ },
+ {
+  "id": 168,
+  "title": "Add a test",
+  "content": "Place module tests under unittest/ / , name the source test .cpp , and declare its dependencies explicitly in BUILD.bazel . Reuse the module's test interfaces and runtime; do not add dependencies on another module's private implementation. Each executable needs one Google Test main. Use ASSERT when subsequent checks cannot proceed after failure and EXPECT when they can. SQL integration tests use the separate mysqltest workflow.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/unittest.md"
+ },
+ {
+  "id": 170,
+  "title": "Prerequisites",
+  "content": "- macOS or Linux host - Emscripten 6.0.12, the version in deps/init/wasm/emscripten-version , with its emcc on PATH - rustup , Python 3.12 or later and curl on PATH - Node.js 24 or later to run the tests - At least 20 GB of free disk space recommended for dependencies, the SDK and build directories",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/webassembly.md"
+ },
+ {
+  "id": 172,
+  "title": "emcc must come from the pinned Emscripten SDK.",
+  "content": "export EMSCRIPTEN=/path/to/emsdk/upstream/emscripten export PATH=\"$EMSCRIPTEN:$PATH\" python3 build.py init --wasm python3 build.py build --config=wasm seekdb init --wasm prepares host dependencies, the pinned Rust toolchain, Wasm base libraries, adapted headers and the Emscripten sysroot in deps/wasm . Subsequent builds need only the final build command. Bazel builds and caches the remaining source libraries and Rust libraries.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/webassembly.md"
+ },
+ {
+  "id": 174,
+  "title": "Build directory contents",
+  "content": "- seekdb wasm database.mjs and seekdb wasm database.wasm : the engine, its Rust libraries and third-party libraries linked into one module, with Emscripten's JavaScript runtime - database.mjs : the JavaScript API, with the database-worker.mjs , worker-server.mjs , runtime-host.mjs , storage-cleanup-worker.mjs and mysql- .mjs modules it loads - shell.html , shell.css , shell.mjs and shell- .mjs : the browser SQL shell - engine-version.mjs : the engine version shown by the shell Serve these files from localhost or over HTTPS with Cross-Origin-Opener-Policy: same-origin and Cross-Origin-Embedder-Policy: require-corp , and .wasm as application/wasm : the engine's threads need SharedArrayBuffer .",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/webassembly.md"
+ },
+ {
+  "id": 177,
+  "title": "Use it in a page",
+  "content": "null : text.decode(v))); } await session.close(); await db.close(); - storage: 'memory' keeps the data directory in Wasm memory and starts empty on every open. storage: 'opfs' keeps it in the seekdb directory of the origin private file system, needs OPFS and Web Locks, and can be open in only one page of an origin at a time. - query yields columns , row and complete events. Row values are each column's text bytes as Uint8Array , or null for SQL NULL.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/webassembly.md"
+ },
+ {
+  "id": 179,
+  "title": "seekdb WebAssembly shell",
+  "content": "A browser SQL shell backed by the seekdb engine compiled to WebAssembly. The terminal layout, command history, and example entry point take inspiration from the Lite4MariaDB shell. Its JavaScript SDK and Worker API also informed the loading, result, error, and close behavior. This shell uses seekdb's existing JavaScript API and WebAssembly engine.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 181,
+  "title": "Run an existing build",
+  "content": "Keep the server running; press Ctrl+C in its terminal to stop it. The launcher copies seekdb wasm database.mjs , seekdb wasm database.wasm , and engine-version.mjs into this checkout's ignored build wasm shell/ directory. It serves the shell and JavaScript API from this checkout, so reloading the page picks up source edits. The server binds to 127.0.0.1 and serves an explicit list of assets. It does not expose the repository or execute SQL.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 183,
+  "title": "Use the shell",
+  "content": "The database starts automatically. Once it is ready, choose Hybrid Search or Fork Table from Examples to run its SQL immediately, or enter SQL in the prompt. Hybrid Search combines full-text matching, a category filter, and vector distance. Fork Table creates a copy and shows that changes to either table do not affect the other. Each example recreates its own demo tables in playground so it can be run repeatedly.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 186,
+  "title": "Use the shell",
+  "content": "Delimiters and short commands inside strings or comments do not end a statement; close the quote or comment first, or use Ctrl+C to discard the input. Set a custom delimiter on its own line with an empty input buffer. It must be nonempty and contain no whitespace or backslashes. The delimiter is removed before SQL reaches the engine. New Instance restores the default ; delimiter. Interactive statements run in order and continue after SQL errors.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 188,
+  "title": "Use the shell",
+  "content": "The Worker sends a bounded preview and consumes the rest of the result so the reported row count and session state remain correct. These display limits do not add a SQL LIMIT or stop query execution. Use LIMIT for large queries. Statement splitting supports default MySQL quoting and NO BACKSLASH ESCAPES . Use backticks for quoted identifiers; the shell does not track ANSI QUOTES mode. Custom delimiters change input parsing, not the SQL features supported by the engine.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 190,
+  "title": "Use the shell",
+  "content": "Connection failures still trigger a reconnect, which rolls back uncommitted changes and resets session settings. Closing the database stops the engine; whether its data survives depends on the storage mode below.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 192,
+  "title": "Storage",
+  "content": "Choose Memory or OPFS from New Instance to clear terminal output, terminate the current engine's Worker, discard its data, and start an empty database in that mode. This action does not wait for native graceful shutdown. SQL input stays disabled until the new instance is ready. Selecting the current mode also creates a new instance.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 194,
+  "title": "Storage",
+  "content": "| Item | Effect | | --- | --- | | Memory | The data directory lives in Wasm memory; it is gone when the database is closed or the page is reloaded | | OPFS | The data directory lives in the origin private file system (OPFS); committed data survives reloads and browser restarts until New Instance clears it | The badge next to the database name shows memory:// or opfs:// . Reloading never clears OPFS files. New Instance explicitly starts empty.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 197,
+  "title": "Build from source",
+  "content": "A static host must send Cross-Origin-Opener-Policy: same-origin and Cross-Origin-Embedder-Policy: require-corp to enable SharedArrayBuffer for Emscripten pthreads. Use HTTPS or loopback HTTP, and serve .wasm as application/wasm and .mjs as JavaScript. Opening the HTML as a file will not work.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 199,
+  "title": "Package a release",
+  "content": "This preview serves the packaged snapshot and uses a free port by default. The development servers above retain no-store so source edits remain visible on reload. The output directory must be new. Every release includes index.html , shell.html , manifest.json , and releases/ / . The hash covers every input asset, including the HTML and JavaScript, so an engine or UI change produces a new directory. The root HTML points its relative assets at that directory.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 201,
+  "title": "Package a release",
+  "content": "The preview negotiates the stored representations using Accept-Encoding , and supports HEAD and conditional requests with an encoding-specific ETag .",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 203,
+  "title": "Package a release",
+  "content": "Copy a new version directory before replacing root HTML, and retain old version directories while existing pages may still reference them. Keep published version directories unchanged. Merely uploading the compressed files to a static host does not enable compression negotiation or these headers.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 206,
+  "title": "How SQL runs",
+  "content": "This accommodates slower browser scheduling, but is not a five-minute limit on the entire startup or a guarantee against failures after a long browser suspension. Worker responses batch up to 64 events and 256 KiB of field bytes, with a 4 ms flush deadline after the first available event. An indivisible event can exceed the byte limit, subject to the existing protocol packet limits.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 208,
+  "title": "How SQL runs",
+  "content": "This keeps one compiled WebAssembly.Module in the page, keyed by both URLs, for later instances. New Instance still creates fresh memory, Workers, and an engine after discarding the previous one and clearing its data. Reloading the page clears this in-page reference; release HTTP caching applies independently. API callers that omit wasmURL retain the generated loader's default behavior. The engine runs on Emscripten WasmFS.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 210,
+  "title": "How SQL runs",
+  "content": "Committed data was recovered after a clean close and after a reload without one in headless Chrome; a durable commit contract on OPFS is not established yet. Database.clearPersistentStorage() removes that directory and leaves other OPFS entries of the origin alone. No database server, TCP connection, or SQL API service is required. Database.close() waits for native shutdown and keeps OPFS data.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ },
+ {
+  "id": 212,
+  "title": "How SQL runs",
+  "content": "A successful discard is not a native graceful shutdown or an onExit(0) acknowledgement, and the browser does not provide a Worker termination completion event. The cleanup Worker's 15-second limit applies to retries for locked files, not to browser suspension or the total duration of storage operations. The Wasm build splits positive and INFINITY Emscripten futex waits into waits of at most one second, calling an empty JavaScript import after each timeout.",
+  "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md"
+ }
+]

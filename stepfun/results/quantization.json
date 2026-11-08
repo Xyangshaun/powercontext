@@ -1,0 +1,863 @@
+{
+  "generatedAt": "2026-11-08T11:30:37.029Z",
+  "runtime": "node 26.3.1 + @huggingface/transformers (onnxruntime-node, CPU EP)",
+  "method": [
+    "Same corpus (data/corpus.json, 96 chunks) and same hand-labelled query set for every variant; embeddings use the CLS pooling + L2 normalisation the app uses.",
+    "Quality = doc-level Recall@5 and MRR@5 over cosine similarity on 18 labelled queries (any listed id counts as a hit).",
+    "Sizes are bytes on disk of the ONNX export only (tokenizer/config excluded).",
+    "The shipped web app always embeds inside a browser Web Worker; this script only produces the quantization comparison."
+  ],
+  "corpusDocs": 96,
+  "goldQueries": 26,
+  "measurements": [
+    {
+      "dtype": "fp32",
+      "label": "FP32 (baseline)",
+      "file": "public/models/bge-small-en-v1.5/onnx/model.onnx",
+      "bytes": 133093490,
+      "mib": 126.93,
+      "status": "ok",
+      "loadMs": 153.1,
+      "indexEmbedMs": 509.4,
+      "msPerDoc": 5.3,
+      "queryEmbedMs": 0.9,
+      "recallAt5": 0.9615,
+      "mrrAt5": 0.8462,
+      "perQuery": [
+        {
+          "query": "how to build seekdb for iOS",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 110,
+            "title": "Build seekdb for iOS"
+          }
+        },
+        {
+          "query": "run the mysql test suite and select cases",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 128,
+            "title": "Output and CI slices"
+          }
+        },
+        {
+          "query": "use the seekdb WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 179,
+            "title": "seekdb WebAssembly shell"
+          }
+        },
+        {
+          "query": "set up homebrew mirrors for faster installs",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 108,
+            "title": "Set up Homebrew mirrors"
+          }
+        },
+        {
+          "query": "build and run seekdb on Android",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 70,
+            "title": "Build and run seekdb on Android"
+          }
+        },
+        {
+          "query": "copy-on-write sandbox for agent exploration",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 7,
+            "title": "🌿 Copy-on-Write Sandboxes for Agent Exploration"
+          }
+        },
+        {
+          "query": "hybrid retrieval in a single SQL statement",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "why does P99 spike under streaming writes",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 45,
+            "title": "Why P99 Explodes Under Streaming Workloads"
+          }
+        },
+        {
+          "query": "refresh a vector index so new writes become queryable",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 54,
+            "title": "Round 2: write new observation, queryable immediately after refreshing"
+          }
+        },
+        {
+          "query": "embed seekdb in a process without a separate server",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 14,
+            "title": "Embedded use"
+          }
+        },
+        {
+          "query": "CXX bridge between C++ and Rust",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 134,
+            "title": "2. Design native interfaces for Rust callers and use CXX for compatibi"
+          }
+        },
+        {
+          "query": "configure build concurrency for remote C++ compilation",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 85,
+            "title": "Use remote C++ compilation"
+          }
+        },
+        {
+          "query": "install the Rust toolchain on a Windows host",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 163,
+            "title": "Windows host packages"
+          }
+        },
+        {
+          "query": "package a release of the WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 199,
+            "title": "Package a release"
+          }
+        },
+        {
+          "query": "MySQL-compatible ACID embeddable database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 9,
+            "title": "🐬 MySQL-Compatible, ACID, Embeddable"
+          }
+        },
+        {
+          "query": "agents need an undo button",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 47,
+            "title": "Agents Need More Than Speed — They Need an Undo Button"
+          }
+        },
+        {
+          "query": "the wrong benchmark to choose a vector database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 34,
+            "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your "
+          }
+        },
+        {
+          "query": "add and execute a unit test",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 168,
+            "title": "Add a test"
+          }
+        },
+        {
+          "query": "ship the database inside a mobile application",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 119,
+            "title": "Use it in an app"
+          }
+        },
+        {
+          "query": "make repeated agent attempts cheap by rolling state back",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 25,
+            "title": "📚 Use Cases"
+          }
+        },
+        {
+          "query": "combine keyword matching and nearest neighbour search in one request",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "measure the latency tail when writes and reads overlap",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        },
+        {
+          "query": "avoid running a separate daemon process",
+          "hitAt5": false,
+          "rank": null,
+          "rr": 0,
+          "top1": {
+            "id": 101,
+            "title": "Run a local instance"
+          }
+        },
+        {
+          "query": "compile the engine so it runs inside a web page",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 114,
+            "title": "Build"
+          }
+        },
+        {
+          "query": "try the product in the cloud without registering",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 67,
+            "title": "-> [['user saw pricing page 3 times today']]"
+          }
+        },
+        {
+          "query": "throughput comparison against Elasticsearch and Milvus",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        }
+      ],
+      "embeddingAgreement": {
+        "meanCosineVsFp32": 1,
+        "minCosineVsFp32": 1,
+        "p05CosineVsFp32": 1
+      }
+    },
+    {
+      "dtype": "fp16",
+      "label": "FP16",
+      "file": "public/models/bge-small-en-v1.5/onnx/model_fp16.onnx",
+      "bytes": 66749212,
+      "mib": 63.66,
+      "status": "ok",
+      "loadMs": 119.6,
+      "indexEmbedMs": 746.9,
+      "msPerDoc": 7.8,
+      "queryEmbedMs": 2,
+      "recallAt5": 0.9615,
+      "mrrAt5": 0.8462,
+      "perQuery": [
+        {
+          "query": "how to build seekdb for iOS",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 110,
+            "title": "Build seekdb for iOS"
+          }
+        },
+        {
+          "query": "run the mysql test suite and select cases",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 128,
+            "title": "Output and CI slices"
+          }
+        },
+        {
+          "query": "use the seekdb WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 179,
+            "title": "seekdb WebAssembly shell"
+          }
+        },
+        {
+          "query": "set up homebrew mirrors for faster installs",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 108,
+            "title": "Set up Homebrew mirrors"
+          }
+        },
+        {
+          "query": "build and run seekdb on Android",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 70,
+            "title": "Build and run seekdb on Android"
+          }
+        },
+        {
+          "query": "copy-on-write sandbox for agent exploration",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 7,
+            "title": "🌿 Copy-on-Write Sandboxes for Agent Exploration"
+          }
+        },
+        {
+          "query": "hybrid retrieval in a single SQL statement",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "why does P99 spike under streaming writes",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 45,
+            "title": "Why P99 Explodes Under Streaming Workloads"
+          }
+        },
+        {
+          "query": "refresh a vector index so new writes become queryable",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 54,
+            "title": "Round 2: write new observation, queryable immediately after refreshing"
+          }
+        },
+        {
+          "query": "embed seekdb in a process without a separate server",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 14,
+            "title": "Embedded use"
+          }
+        },
+        {
+          "query": "CXX bridge between C++ and Rust",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 134,
+            "title": "2. Design native interfaces for Rust callers and use CXX for compatibi"
+          }
+        },
+        {
+          "query": "configure build concurrency for remote C++ compilation",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 85,
+            "title": "Use remote C++ compilation"
+          }
+        },
+        {
+          "query": "install the Rust toolchain on a Windows host",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 163,
+            "title": "Windows host packages"
+          }
+        },
+        {
+          "query": "package a release of the WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 199,
+            "title": "Package a release"
+          }
+        },
+        {
+          "query": "MySQL-compatible ACID embeddable database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 9,
+            "title": "🐬 MySQL-Compatible, ACID, Embeddable"
+          }
+        },
+        {
+          "query": "agents need an undo button",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 47,
+            "title": "Agents Need More Than Speed — They Need an Undo Button"
+          }
+        },
+        {
+          "query": "the wrong benchmark to choose a vector database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 34,
+            "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your "
+          }
+        },
+        {
+          "query": "add and execute a unit test",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 168,
+            "title": "Add a test"
+          }
+        },
+        {
+          "query": "ship the database inside a mobile application",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 119,
+            "title": "Use it in an app"
+          }
+        },
+        {
+          "query": "make repeated agent attempts cheap by rolling state back",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 25,
+            "title": "📚 Use Cases"
+          }
+        },
+        {
+          "query": "combine keyword matching and nearest neighbour search in one request",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "measure the latency tail when writes and reads overlap",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        },
+        {
+          "query": "avoid running a separate daemon process",
+          "hitAt5": false,
+          "rank": null,
+          "rr": 0,
+          "top1": {
+            "id": 101,
+            "title": "Run a local instance"
+          }
+        },
+        {
+          "query": "compile the engine so it runs inside a web page",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 114,
+            "title": "Build"
+          }
+        },
+        {
+          "query": "try the product in the cloud without registering",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 67,
+            "title": "-> [['user saw pricing page 3 times today']]"
+          }
+        },
+        {
+          "query": "throughput comparison against Elasticsearch and Milvus",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        }
+      ],
+      "embeddingAgreement": {
+        "meanCosineVsFp32": 1,
+        "minCosineVsFp32": 1,
+        "p05CosineVsFp32": 1
+      }
+    },
+    {
+      "dtype": "q8",
+      "label": "INT8 (shipped)",
+      "file": "public/models/bge-small-en-v1.5/onnx/model_quantized.onnx",
+      "bytes": 34014426,
+      "mib": 32.44,
+      "status": "ok",
+      "loadMs": 63.8,
+      "indexEmbedMs": 573.5,
+      "msPerDoc": 6,
+      "queryEmbedMs": 0.9,
+      "recallAt5": 0.9615,
+      "mrrAt5": 0.8462,
+      "perQuery": [
+        {
+          "query": "how to build seekdb for iOS",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 110,
+            "title": "Build seekdb for iOS"
+          }
+        },
+        {
+          "query": "run the mysql test suite and select cases",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 128,
+            "title": "Output and CI slices"
+          }
+        },
+        {
+          "query": "use the seekdb WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 179,
+            "title": "seekdb WebAssembly shell"
+          }
+        },
+        {
+          "query": "set up homebrew mirrors for faster installs",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 108,
+            "title": "Set up Homebrew mirrors"
+          }
+        },
+        {
+          "query": "build and run seekdb on Android",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 70,
+            "title": "Build and run seekdb on Android"
+          }
+        },
+        {
+          "query": "copy-on-write sandbox for agent exploration",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 7,
+            "title": "🌿 Copy-on-Write Sandboxes for Agent Exploration"
+          }
+        },
+        {
+          "query": "hybrid retrieval in a single SQL statement",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "why does P99 spike under streaming writes",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 45,
+            "title": "Why P99 Explodes Under Streaming Workloads"
+          }
+        },
+        {
+          "query": "refresh a vector index so new writes become queryable",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 54,
+            "title": "Round 2: write new observation, queryable immediately after refreshing"
+          }
+        },
+        {
+          "query": "embed seekdb in a process without a separate server",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 14,
+            "title": "Embedded use"
+          }
+        },
+        {
+          "query": "CXX bridge between C++ and Rust",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 134,
+            "title": "2. Design native interfaces for Rust callers and use CXX for compatibi"
+          }
+        },
+        {
+          "query": "configure build concurrency for remote C++ compilation",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 85,
+            "title": "Use remote C++ compilation"
+          }
+        },
+        {
+          "query": "install the Rust toolchain on a Windows host",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 163,
+            "title": "Windows host packages"
+          }
+        },
+        {
+          "query": "package a release of the WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 199,
+            "title": "Package a release"
+          }
+        },
+        {
+          "query": "MySQL-compatible ACID embeddable database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 9,
+            "title": "🐬 MySQL-Compatible, ACID, Embeddable"
+          }
+        },
+        {
+          "query": "agents need an undo button",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 47,
+            "title": "Agents Need More Than Speed — They Need an Undo Button"
+          }
+        },
+        {
+          "query": "the wrong benchmark to choose a vector database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 34,
+            "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your "
+          }
+        },
+        {
+          "query": "add and execute a unit test",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 168,
+            "title": "Add a test"
+          }
+        },
+        {
+          "query": "ship the database inside a mobile application",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 119,
+            "title": "Use it in an app"
+          }
+        },
+        {
+          "query": "make repeated agent attempts cheap by rolling state back",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 25,
+            "title": "📚 Use Cases"
+          }
+        },
+        {
+          "query": "combine keyword matching and nearest neighbour search in one request",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "measure the latency tail when writes and reads overlap",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        },
+        {
+          "query": "avoid running a separate daemon process",
+          "hitAt5": false,
+          "rank": null,
+          "rr": 0,
+          "top1": {
+            "id": 101,
+            "title": "Run a local instance"
+          }
+        },
+        {
+          "query": "compile the engine so it runs inside a web page",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 114,
+            "title": "Build"
+          }
+        },
+        {
+          "query": "try the product in the cloud without registering",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 67,
+            "title": "-> [['user saw pricing page 3 times today']]"
+          }
+        },
+        {
+          "query": "throughput comparison against Elasticsearch and Milvus",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        }
+      ],
+      "embeddingAgreement": {
+        "meanCosineVsFp32": 0.99845,
+        "minCosineVsFp32": 0.996762,
+        "p05CosineVsFp32": 0.997905
+      }
+    }
+  ],
+  "deltas": {
+    "int8SizeVsFp32": 74.44,
+    "int8RecallVsFp32": 0,
+    "int8MrrVsFp32": 0,
+    "fp16SizeVsFp32": 49.85
+  }
+}

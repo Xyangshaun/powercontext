@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StepFun · Browser-side Hybrid Retrieval on seekdb</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23101214'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23e2a95c'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark"></span>
+      <div>
+        <h1>StepFun</h1>
+        <p>浏览器端 embedding · seekdb 混合检索</p>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip" id="chip-engine">seekdb · 连接中</span>
+      <span class="chip" id="chip-device">WebGPU 检测中</span>
+      <span class="chip" id="chip-docs">0 docs</span>
+    </div>
+  </header>
+
+  <div class="banner hidden" id="fallback-banner">
+    当前浏览器未启用 WebGPU，embedding 已自动降级到 WASM 后端。检索结果不受影响，仅向量化耗时更长。
+  </div>
+
+  <main>
+    <section class="panel controls">
+      <div class="panel-head">
+        <h2>运行顺序</h2>
+        <span class="hint">文档与查询向量均在本机计算</span>
+      </div>
+      <ol class="steps">
+        <li id="step-load"><span class="dot"></span><div><strong>加载 embedding 模型</strong><em>bge-small-en-v1.5 · int8</em></div></li>
+        <li id="step-embed"><span class="dot"></span><div><strong>向量化语料</strong><em id="embed-info">Web Worker 批量编码</em></div></li>
+        <li id="step-index"><span class="dot"></span><div><strong>写入 seekdb 并刷新索引</strong><em>DBMS_VECTOR.REFRESH_INDEX</em></div></li>
+        <li id="step-query"><span class="dot"></span><div><strong>单条 SQL 混合检索</strong><em>全文 + 向量 RRF 融合</em></div></li>
+      </ol>
+      <div class="actions">
+        <button id="btn-build" class="primary">建立索引</button>
+        <button id="btn-eval" class="ghost">运行双阶段评测</button>
+      </div>
+      <p class="fine" id="status-line">等待加载模型</p>
+    </section>
+
+    <section class="panel metrics">
+      <div class="panel-head">
+        <h2>分阶段耗时</h2>
+        <span class="hint" id="metric-scope">尚未实测</span>
+      </div>
+      <div class="metric-grid">
+        <div class="metric"><span>模型加载</span><b id="m-load">—</b></div>
+        <div class="metric"><span>语料向量化</span><b id="m-embed">—</b></div>
+        <div class="metric"><span>写入</span><b id="m-write">—</b></div>
+        <div class="metric"><span>索引刷新</span><b id="m-refresh">—</b></div>
+        <div class="metric"><span>查询向量化</span><b id="m-qembed">—</b></div>
+        <div class="metric"><span>检索 SQL</span><b id="m-sql">—</b></div>
+        <div class="metric wide"><span>端到端</span><b id="m-e2e">—</b></div>
+      </div>
+      <div class="runs">
+        <div class="run-row"><span>首次（冷）</span><b id="r-cold">—</b></div>
+        <div class="run-row"><span>预热后</span><b id="r-warm">—</b></div>
+      </div>
+    </section>
+
+    <section class="panel search">
+      <div class="panel-head">
+        <h2>混合检索</h2>
+        <span class="hint">向量召回 ∪ 全文召回，在 seekdb 内融合</span>
+      </div>
+      <form id="search-form" class="search-form">
+        <input id="query" type="text" autocomplete="off" placeholder="例如：how to refresh a vector index / fork a database" />
+        <button class="primary" type="submit">检索</button>
+      </form>
+      <div class="results" id="results">
+        <div class="empty">建立索引后输入查询，结果会显示各路的排名与融合得分。</div>
+      </div>
+    </section>
+
+    <section class="panel sql-panel">
+      <div class="panel-head">
+        <h2>检索语句</h2>
+        <span class="hint">一次请求 = 一条 SQL</span>
+      </div>
+      <pre id="sql-preview"><code>SELECT ... FROM docs d
+  JOIN ( 向量分支：ORDER BY l2_distance(embedding, ?) APPROXIMATE
+       UNION ALL
+         全文分支：WHERE MATCH(content) AGAINST(?) ) u
+  ...
+  ORDER BY RRF(score, k=60) DESC LIMIT 8</code></pre>
+      <div class="sql-meta" id="sql-meta">等待实测</div>
+    </section>
+  </main>
+
+  <footer>
+    <span>StepFun · OceanBase 数据库大赛 2026 · 生态题</span>
+    <span id="footer-device">runtime: —</span>
+  </footer>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

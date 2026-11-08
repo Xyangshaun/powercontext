@@ -1,0 +1,2198 @@
+{
+  "schemaVersion": "stepfun-submission-results/v1",
+  "generatedAt": "2026-11-08T11:38:02.072Z",
+  "task": {
+    "id": "600073",
+    "name": "StepFun",
+    "points": 20
+  },
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "webgpuAvailable": true,
+    "deviceUsed": "webgpu",
+    "fallbackTriggered": false
+  },
+  "model": {
+    "id": "Xenova/bge-small-en-v1.5",
+    "upstream": "BAAI/bge-small-en-v1.5",
+    "license": "MIT",
+    "dtype": "int8",
+    "file": "public/models/bge-small-en-v1.5/onnx/model_quantized.onnx",
+    "bytes": 34014426,
+    "dimension": 384,
+    "runtime": "transformers.js 4.x + onnxruntime-web (WebGPU → WASM fallback)",
+    "embeddingsComputedIn": "browser (Web Worker)"
+  },
+  "corpus": {
+    "docs": 96,
+    "textUsed": "seekdb upstream docs (Apache-2.0), chunked",
+    "maxCandidates": 40,
+    "topK": 8
+  },
+  "retrieval": {
+    "engine": "seekdb (@oceanbase/seekdb-node, embedded)",
+    "statementCount": 1,
+    "hybridInEngine": true,
+    "fusion": "RRF k=60 computed inside the SQL",
+    "object": {
+      "table": "docs",
+      "vectorIndex": "idx_docs_vec (HNSW, l2, vsag)",
+      "fulltextIndex": "idx_docs_fts"
+    },
+    "explain": [
+      {
+        "query plan": "==================================================================================="
+      },
+      {
+        "query plan": "|ID|OPERATOR                             |NAME              |EST.ROWS|EST.TIME(us)|"
+      },
+      {
+        "query plan": "-----------------------------------------------------------------------------------"
+      },
+      {
+        "query plan": "|0 |TOP-N SORT                           |                  |8       |1316        |"
+      },
+      {
+        "query plan": "|1 |└─HASH GROUP BY                      |                  |20      |1310        |"
+      },
+      {
+        "query plan": "|2 |  └─NESTED-LOOP JOIN                 |                  |21      |1294        |"
+      },
+      {
+        "query plan": "|3 |    ├─SUBPLAN SCAN                   |u                 |20      |845         |"
+      },
+      {
+        "query plan": "|4 |    │ └─UNION ALL                    |                  |20      |845         |"
+      },
+      {
+        "query plan": "|5 |    │   ├─SUBPLAN SCAN               |v                 |1       |242         |"
+      },
+      {
+        "query plan": "|6 |    │   │ └─TOP-N SORT               |                  |1       |242         |"
+      },
+      {
+        "query plan": "|7 |    │   │   └─WINDOW FUNCTION        |                  |1       |242         |"
+      },
+      {
+        "query plan": "|8 |    │   │     └─SORT                 |                  |1       |241         |"
+      },
+      {
+        "query plan": "|9 |    │   │       └─VECTOR INDEX SCAN  |docs(idx_docs_vec)|1       |241         |"
+      },
+      {
+        "query plan": "|10|    │   └─SUBPLAN SCAN               |f                 |19      |604         |"
+      },
+      {
+        "query plan": "|11|    │     └─LIMIT                    |                  |19      |604         |"
+      },
+      {
+        "query plan": "|12|    │       └─WINDOW FUNCTION        |                  |19      |604         |"
+      },
+      {
+        "query plan": "|13|    │         └─SORT                 |                  |19      |588         |"
+      },
+      {
+        "query plan": "|14|    │           └─TEXT RETRIEVAL SCAN|docs(idx_docs_fts)|19      |583         |"
+      },
+      {
+        "query plan": "|15|    └─TABLE GET                      |d                 |1       |22          |"
+      },
+      {
+        "query plan": "==================================================================================="
+      },
+      {
+        "query plan": "Outputs & filters:"
+      },
+      {
+        "query plan": "-------------------------------------"
+      },
+      {
+        "query plan": "  0 - output([d.id], [d.title], [d.content], [d.source], [T_FUN_MAX(u.rr)], [T_FUN_MAX(CASE WHEN u.src = 'v' THEN u.rnk ELSE NULL END)], [T_FUN_MAX(CASE "
+      },
+      {
+        "query plan": "      WHEN u.src = 'f' THEN u.rnk ELSE NULL END)]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      sort_keys([T_FUN_MAX(u.rr), DESC], [T_FUN_MAX(CASE WHEN u.src = 'v' THEN u.rnk ELSE NULL END), ASC]), topn(8)"
+      },
+      {
+        "query plan": "  1 - output([T_FUN_MAX(u.rr)], [T_FUN_MAX(CASE WHEN u.src = 'v' THEN u.rnk ELSE NULL END)], [d.id], [d.title], [d.content], [d.source], [T_FUN_MAX(CASE "
+      },
+      {
+        "query plan": "      WHEN u.src = 'f' THEN u.rnk ELSE NULL END)]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      group([d.id]), agg_func([T_FUN_MAX(u.rr)], [T_FUN_MAX(CASE WHEN u.src = 'v' THEN u.rnk ELSE NULL END)], [T_FUN_MAX(CASE WHEN u.src = 'f' THEN u.rnk "
+      },
+      {
+        "query plan": "      ELSE NULL END)])"
+      },
+      {
+        "query plan": "  2 - output([d.id], [d.title], [d.content], [d.source], [u.src], [u.rnk], [u.rr]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      conds(nil), nl_params_([u.id(:0)]), use_batch=true"
+      },
+      {
+        "query plan": "  3 - output([u.id], [u.rr], [u.src], [u.rnk]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      access([u.id], [u.rr], [u.src], [u.rnk])"
+      },
+      {
+        "query plan": "  4 - output([UNION([1])], [UNION([2])], [UNION([3])], [UNION([4])]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "  5 - output([v.id], ['v'], [v.rnk], [cast(1.0, DECIMAL_INT(35, 34)) / cast(60 + v.rnk, DECIMAL_INT(21, 0))]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      access([v.id], [v.rnk])"
+      },
+      {
+        "query plan": "  6 - output([docs.id], [T_WIN_FUN_ROW_NUMBER()]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      sort_keys([l2_distance(docs.embedding, cast('[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]', ARRAY(18, -1))), ASC]), topn(40)"
+      },
+      {
+        "query plan": "  7 - output([l2_distance(docs.embedding, cast('[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]', ARRAY(18, -1)))], [docs.id], [T_WIN_FUN_ROW_NUMBER()]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      win_expr(T_WIN_FUN_ROW_NUMBER()), partition_by(nil), order_by([l2_distance(docs.embedding, cast('[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]', ARRAY(18, -1))), ASC]), window_type(RANGE),"
+      },
+      {
+        "query plan": "       upper(UNBOUNDED PRECEDING), lower(UNBOUNDED FOLLOWING)"
+      },
+      {
+        "query plan": "  8 - output([l2_distance(docs.embedding, cast('[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]', ARRAY(18, -1)))], [docs.id], [l2_distance(docs.embedding, cast('[0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]', ARRAY(18, -1)))]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      sort_keys([l2_distance(docs.embedding, cast('[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]', ARRAY(18, -1))), ASC])"
+      },
+      {
+        "query plan": "  9 - output([docs.id], [l2_distance(docs.embedding, cast('[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]', ARRAY(18, -1)))], [l2_distance(docs.embedding, cast('[0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+      },
+      {
+        "query plan": "      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]', ARRAY(18, -1)))]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      access([docs.id], [docs.embedding]), partitions(p0)"
+      },
+      {
+        "query plan": "      is_index_back=true, is_global_index=false, "
+      },
+      {
+        "query plan": "      range_key([docs.__vid_1794137839918430], [docs.__type_20_1794137839918497]), range(MIN,MIN ; MAX,MAX)always true"
+      },
+      {
+        "query plan": " 10 - output([f.id], ['f'], [f.rnk], [cast(1.0, DECIMAL_INT(35, 34)) / cast(60 + f.rnk, DECIMAL_INT(21, 0))]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      access([f.id], [f.rnk])"
+      },
+      {
+        "query plan": " 11 - output([docs.id], [T_WIN_FUN_ROW_NUMBER()]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      limit(40), offset(nil)"
+      },
+      {
+        "query plan": " 12 - output([docs.id], [T_WIN_FUN_ROW_NUMBER()]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      win_expr(T_WIN_FUN_ROW_NUMBER()), partition_by(nil), order_by([MATCH(docs.content) AGAINST('how do I refresh a vector index'), DESC]), window_type(RANGE),"
+      },
+      {
+        "query plan": "       upper(UNBOUNDED PRECEDING), lower(UNBOUNDED FOLLOWING)"
+      },
+      {
+        "query plan": " 13 - output([docs.id], [MATCH(docs.content) AGAINST('how do I refresh a vector index')]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      sort_keys([MATCH(docs.content) AGAINST('how do I refresh a vector index'), DESC])"
+      },
+      {
+        "query plan": " 14 - output([docs.id], [MATCH(docs.content) AGAINST('how do I refresh a vector index')]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      access([docs.id]), partitions(p0)"
+      },
+      {
+        "query plan": "      is_index_back=true, is_global_index=false, "
+      },
+      {
+        "query plan": "      calc_relevance=true, match_expr(MATCH(docs.content) AGAINST('how do I refresh a vector index')), "
+      },
+      {
+        "query plan": "      pushdown_match_filter(MATCH(docs.content) AGAINST('how do I refresh a vector index'))"
+      },
+      {
+        "query plan": " 15 - output([d.id], [d.title], [d.content], [d.source]), filter(nil), rowset=256"
+      },
+      {
+        "query plan": "      access([GROUP_ID], [d.id], [d.title], [d.content], [d.source]), partitions(p0)"
+      },
+      {
+        "query plan": "      is_index_back=false, is_global_index=false, "
+      },
+      {
+        "query plan": "      range_key([d.id]), range(MIN ; MAX), "
+      },
+      {
+        "query plan": "      range_cond([d.id = :0])"
+      }
+    ],
+    "queries": [
+      {
+        "query": "how do I refresh a vector index",
+        "sqlMs": 8.10404100001324,
+        "top": [
+          {
+            "id": 54,
+            "title": "Round 2: write new observation, queryable immediately after refreshing index",
+            "vecRank": 1,
+            "ftsRank": 2,
+            "score": 0.01639
+          },
+          {
+            "id": 67,
+            "title": "-> [['user saw pricing page 3 times today']]",
+            "vecRank": 2,
+            "ftsRank": 1,
+            "score": 0.01639
+          },
+          {
+            "id": 52,
+            "title": "Try It in 30 Seconds",
+            "vecRank": 3,
+            "ftsRank": null,
+            "score": 0.01587
+          }
+        ]
+      },
+      {
+        "query": "fork a database to run an experiment safely",
+        "sqlMs": 3.6869580000056885,
+        "top": [
+          {
+            "id": 183,
+            "title": "Use the shell",
+            "vecRank": 1,
+            "ftsRank": 1,
+            "score": 0.01639
+          },
+          {
+            "id": 65,
+            "title": "Agent に必要なのは速さだけではない——「やり直し」の仕組みも必要",
+            "vecRank": null,
+            "ftsRank": 2,
+            "score": 0.01613
+          },
+          {
+            "id": 1,
+            "title": "**Write. Search. Fork. The State Store for AI Agents.**",
+            "vecRank": 2,
+            "ftsRank": 20,
+            "score": 0.01613
+          }
+        ]
+      },
+      {
+        "query": "difference between full-text search and vector search",
+        "sqlMs": 3.6046250000072177,
+        "top": [
+          {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement",
+            "vecRank": 1,
+            "ftsRank": 3,
+            "score": 0.01639
+          },
+          {
+            "id": 1,
+            "title": "**Write. Search. Fork. The State Store for AI Agents.**",
+            "vecRank": 6,
+            "ftsRank": 1,
+            "score": 0.01639
+          },
+          {
+            "id": 34,
+            "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+            "vecRank": 2,
+            "ftsRank": 10,
+            "score": 0.01613
+          }
+        ]
+      },
+      {
+        "query": "how to start seekdb locally and connect a client",
+        "sqlMs": 4.06745800000499,
+        "top": [
+          {
+            "id": 14,
+            "title": "Embedded use",
+            "vecRank": 1,
+            "ftsRank": 16,
+            "score": 0.01639
+          },
+          {
+            "id": 52,
+            "title": "Try It in 30 Seconds",
+            "vecRank": 11,
+            "ftsRank": 1,
+            "score": 0.01639
+          },
+          {
+            "id": 76,
+            "title": "Start and connect",
+            "vecRank": 2,
+            "ftsRank": 2,
+            "score": 0.01613
+          }
+        ]
+      },
+      {
+        "query": "incremental HNSW index memory budget",
+        "sqlMs": 4.551875000004657,
+        "top": [
+          {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+            "vecRank": 1,
+            "ftsRank": 15,
+            "score": 0.01639
+          },
+          {
+            "id": 43,
+            "title": "Why P99 Explodes Under Streaming Workloads",
+            "vecRank": 4,
+            "ftsRank": 1,
+            "score": 0.01639
+          },
+          {
+            "id": 3,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+            "vecRank": 2,
+            "ftsRank": 2,
+            "score": 0.01613
+          }
+        ]
+      }
+    ]
+  },
+  "runs": {
+    "cold": {
+      "label": "cold",
+      "device": "webgpu",
+      "stageMs": {
+        "modelLoadMs": 771.6000000238419,
+        "corpusEmbedMs": 39838.69999998808,
+        "indexWriteMs": 24.2704579999845,
+        "indexRefreshMs": 10.083875000011176,
+        "indexTotalMs": 34.35433299999568,
+        "phaseTotalMs": 41343.19999998808
+      },
+      "queries": [
+        {
+          "query": "how do I refresh a vector index",
+          "queryEmbedMs": 119.69999998807907,
+          "sqlMs": 8.10404100001324,
+          "e2eMs": 130.39999997615814,
+          "results": [
+            {
+              "id": 54,
+              "title": "Round 2: write new observation, queryable immediately after refreshing index",
+              "content": "memory.upsert(ids=[\"4\"], documents=[\"user saw pricing page 3 times today\"]) memory.refresh index() results = memory.query(query texts=\"purchase intent signals\", n results=1) print(results[\"documents\"])",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01639,
+              "vecRank": 1,
+              "ftsRank": 2
+            },
+            {
+              "id": 67,
+              "title": "-> [['user saw pricing page 3 times today']]",
+              "content": "サーバー不要、スキーマ不要、組み込みモードでプロセス内で動作します。書き込みは非同期インデックスパイプラインを通ります（サーバーモードと同じアーキテクチャ）。即座にクエリする必要がある場合は refresh index() を一度呼び出してインデックスの準備を確認してください。サーバーモードや分散モードへの切り替えは接続パラメータを 1 行変更するだけです。Cloud でインストール不要のお試しもできます（登録不要、7 日間無料、curl 一発）。",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md",
+              "score": 0.01639,
+              "vecRank": 2,
+              "ftsRank": 1
+            },
+            {
+              "id": 52,
+              "title": "Try It in 30 Seconds",
+              "content": "python import pyseekdb client = pyseekdb.Client(path=\"./agent state.db\") memory = client.get or create collection(name=\"episodic\")",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01587,
+              "vecRank": 3,
+              "ftsRank": null
+            },
+            {
+              "id": 34,
+              "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+              "content": "The real workload of an Agent is a streaming workload — most vector databases weren't designed for it. If you're choosing a vector database for your Agent, you're probably looking at ann-benchmarks or the performance comparisons published by each vendor. Those tests run a workload like this: bulk-import all the data, build the index, then run read-only queries.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01587,
+              "vecRank": 6,
+              "ftsRank": 3
+            },
+            {
+              "id": 36,
+              "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+              "content": "VectorDBBench designed its StreamingPerformanceCase specifically for this: continuous writes at a fixed rate + concurrent queries, exactly like a production Agent. VectorDBBench is maintained by Zilliz (the company behind Milvus) and is a third-party open-source benchmark framework. We used it to test 6 mainstream vector databases.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01563,
+              "vecRank": 4,
+              "ftsRank": 10
+            },
+            {
+              "id": 3,
+              "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+              "content": "Agent workloads are continuous write + millisecond-later read. seekdb's async index pipeline (Change Stream) decouples DML from index build, and its two-level HNSW (incremental + snapshot) makes newly-written vectors immediately searchable. The write path commits and returns without waiting on index construction.",
+              "source": "README.md",
+              "score": 0.01563,
+              "vecRank": 5,
+              "ftsRank": 4
+            },
+            {
+              "id": 5,
+              "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+              "content": "Queries hit both delta and snapshot indexes with fine-grained read locks — this is why P99 stays flat under concurrency. The result: 1,523 QPS with 21.7 ms concurrent P99 — 10.7× the QPS of Milvus, and P99 jitter of just 1.1× when concurrency rises (vs ~10× for ES / Milvus on the same workload). Source: src/observer/change stream/ · src/observer/vector index/",
+              "source": "README.md",
+              "score": 0.01538,
+              "vecRank": 18,
+              "ftsRank": 5
+            },
+            {
+              "id": 43,
+              "title": "Why P99 Explodes Under Streaming Workloads",
+              "content": "Writes and index building are physically decoupled — writes are never blocked by index construction. Second, the query path always hits exactly two indexes. seekdb maintains a delta HNSW (incremental layer, receives new writes) and a snapshot HNSW (main base layer), similar to the tiered approach of an LSM-Tree.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01515,
+              "vecRank": 19,
+              "ftsRank": 6
+            }
+          ]
+        },
+        {
+          "query": "fork a database to run an experiment safely",
+          "queryEmbedMs": 99.89999997615814,
+          "sqlMs": 3.6869580000056885,
+          "e2eMs": 105.19999998807907,
+          "results": [
+            {
+              "id": 183,
+              "title": "Use the shell",
+              "content": "The database starts automatically. Once it is ready, choose Hybrid Search or Fork Table from Examples to run its SQL immediately, or enter SQL in the prompt. Hybrid Search combines full-text matching, a category filter, and vector distance. Fork Table creates a copy and shows that changes to either table do not affect the other. Each example recreates its own demo tables in playground so it can be run repeatedly.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md",
+              "score": 0.01639,
+              "vecRank": 1,
+              "ftsRank": 1
+            },
+            {
+              "id": 65,
+              "title": "Agent に必要なのは速さだけではない——「やり直し」の仕組みも必要",
+              "content": "パフォーマンスについては説明しました。しかし Agent を開発したことがある方なら、もう一つの課題をご存知でしょう：Agent は試行錯誤的にデータを変更する必要があります（memory の書き換え、実験の実行、テーブルの破壊的変更など）。 安全なサンドボックスとロールバックの仕組みが必要です。 ほとんどのベクトルデータベースにはこの概念がありません。seekdb はカーネルレベルで Copy-on-Write を実装しています： これはカーネルレベルの COW であり、アプリケーション層の snapshot/restore ではありません。fork は秒単位で完了し、データのコピーは行わず、各サンドボックスは完全に書き込み可能なデータベースです（テーブル構造、ベクトルインデックス、自動インクリメントカラムすべてが正常に動作します）。3 つのコンフリクト戦略（ FAIL / THEIRS / OURS ）により、Agent の変更をどこまで信頼するかを精密に制御できます。 FORK DATABASE と FORK TABLE の 2 つの粒度をサポートしています。",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md",
+              "score": 0.01613,
+              "vecRank": null,
+              "ftsRank": 2
+            },
+            {
+              "id": 1,
+              "title": "**Write. Search. Fork. The State Store for AI Agents.**",
+              "content": "MySQL-compatible · Embedded or Server · Hybrid Vector + Full-text Search · COW Sandbox ⚡ 1,523 QPS streaming write+search (10× Milvus, 3× Elasticsearch) 🌿 FORK/MERGE sandboxes for safe agent exploration 🔍 Vector + full-text + scalar in one SQL query 🐬 Full ACID, MySQL protocol, works with LangChain/LlamaIndex/Dify English | 中文版 | 日本語 30-Second Try · Quick Start · Embedded SDKs · Why seekdb · Ecosystem · Contributing If you find seekdb useful, consider giving it a star — it helps others discover the project.",
+              "source": "README.md",
+              "score": 0.01613,
+              "vecRank": 2,
+              "ftsRank": 20
+            },
+            {
+              "id": 150,
+              "title": "10. Validate behavior according to risk",
+              "content": "Distinguish unsupported capabilities from actual failures. Compilation alone does not prove that a migration is complete. For performance-sensitive paths, compare the baseline and new implementation with equivalent semantics and workloads. Report the results, environment, and coverage gaps. Do not hide regressions by reducing functionality.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md",
+              "score": 0.01587,
+              "vecRank": 3,
+              "ftsRank": null
+            },
+            {
+              "id": 34,
+              "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+              "content": "The real workload of an Agent is a streaming workload — most vector databases weren't designed for it. If you're choosing a vector database for your Agent, you're probably looking at ann-benchmarks or the performance comparisons published by each vendor. Those tests run a workload like this: bulk-import all the data, build the index, then run read-only queries.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01587,
+              "vecRank": 6,
+              "ftsRank": 3
+            },
+            {
+              "id": 9,
+              "title": "🐬 MySQL-Compatible, ACID, Embeddable",
+              "content": "Built on the proven OceanBase SQL engine. Works as an embedded library, a single-node server, or in the OceanBase distributed cluster. Full ACID, real-time writes, and the entire MySQL ecosystem out of the box.",
+              "source": "README.md",
+              "score": 0.01563,
+              "vecRank": 4,
+              "ftsRank": null
+            },
+            {
+              "id": 7,
+              "title": "🌿 Copy-on-Write Sandboxes for Agent Exploration",
+              "content": "USE agent sandbox 42; INSERT INTO memory (session id, embedding, content) VALUES (...); -- Accept the work back to mainline (strategies: FAIL / THEIRS / OURS) MERGE TABLE agent sandbox 42.memory INTO agent state.memory STRATEGY THEIRS; -- ...or throw it away: DROP DATABASE agent sandbox 42; Source: tools/deploy/mysql test/test suite/fork table/",
+              "source": "README.md",
+              "score": 0.01563,
+              "vecRank": 24,
+              "ftsRank": 4
+            },
+            {
+              "id": 128,
+              "title": "Output and CI slices",
+              "content": "The runner initializes the test database and users, invokes the mysqltest binary, and exits nonzero if a case or infrastructure step fails. Results are written to --work-dir/seekdb result.json ; client logs and failure diagnostics are saved under the same work directory. Instance data is removed after the run. | Option | Meaning | | --- | --- | | --suite , --test-set | Select suites or cases; omitted means all enabled cases.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/mysqltest.md",
+              "score": 0.01538,
+              "vecRank": 5,
+              "ftsRank": 8
+            }
+          ]
+        },
+        {
+          "query": "difference between full-text search and vector search",
+          "queryEmbedMs": 84.10000002384186,
+          "sqlMs": 3.6046250000072177,
+          "e2eMs": 89.40000003576279,
+          "results": [
+            {
+              "id": 50,
+              "title": "Hybrid Retrieval in a Single SQL Statement",
+              "content": "In seekdb, that's a single SQL statement: Vector + full-text + scalar filtering are pushed down within the same execution plan — no need to assemble multiple query results on the client side.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01639,
+              "vecRank": 1,
+              "ftsRank": 3
+            },
+            {
+              "id": 1,
+              "title": "**Write. Search. Fork. The State Store for AI Agents.**",
+              "content": "MySQL-compatible · Embedded or Server · Hybrid Vector + Full-text Search · COW Sandbox ⚡ 1,523 QPS streaming write+search (10× Milvus, 3× Elasticsearch) 🌿 FORK/MERGE sandboxes for safe agent exploration 🔍 Vector + full-text + scalar in one SQL query 🐬 Full ACID, MySQL protocol, works with LangChain/LlamaIndex/Dify English | 中文版 | 日本語 30-Second Try · Quick Start · Embedded SDKs · Why seekdb · Ecosystem · Contributing If you find seekdb useful, consider giving it a star — it helps others discover the project.",
+              "source": "README.md",
+              "score": 0.01639,
+              "vecRank": 6,
+              "ftsRank": 1
+            },
+            {
+              "id": 34,
+              "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+              "content": "The real workload of an Agent is a streaming workload — most vector databases weren't designed for it. If you're choosing a vector database for your Agent, you're probably looking at ann-benchmarks or the performance comparisons published by each vendor. Those tests run a workload like this: bulk-import all the data, build the index, then run read-only queries.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01613,
+              "vecRank": 2,
+              "ftsRank": 10
+            },
+            {
+              "id": 27,
+              "title": "📚 Use Cases",
+              "content": "Enterprise QA, customer support, industry insights, personal knowledge bases. - 🔍 Semantic Search — embedding-based search across text, images, and other modalities. Product search, text-to-image, image-to-product. - 💻 AI-Assisted Coding — semantic code search, multi-project isolation, time-travel queries for IDE plugins and code agents.",
+              "source": "README.md",
+              "score": 0.01613,
+              "vecRank": 3,
+              "ftsRank": 2
+            },
+            {
+              "id": 183,
+              "title": "Use the shell",
+              "content": "The database starts automatically. Once it is ready, choose Hybrid Search or Fork Table from Examples to run its SQL immediately, or enter SQL in the prompt. Hybrid Search combines full-text matching, a category filter, and vector distance. Fork Table creates a copy and shows that changes to either table do not affect the other. Each example recreates its own demo tables in playground so it can be run repeatedly.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md",
+              "score": 0.01563,
+              "vecRank": 4,
+              "ftsRank": 4
+            },
+            {
+              "id": 3,
+              "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+              "content": "Agent workloads are continuous write + millisecond-later read. seekdb's async index pipeline (Change Stream) decouples DML from index build, and its two-level HNSW (incremental + snapshot) makes newly-written vectors immediately searchable. The write path commits and returns without waiting on index construction.",
+              "source": "README.md",
+              "score": 0.01538,
+              "vecRank": 5,
+              "ftsRank": null
+            },
+            {
+              "id": 12,
+              "title": "Embedded use",
+              "content": "The context managers close the cursor and SQL connection before releasing the runtime handle: Run it; the result is [{'value': 1}] : Full usage guide · Supported platforms and requirements For a higher-level Collection API with text embedding and hybrid search, see pyseekdb.",
+              "source": "README.md",
+              "score": 0.01538,
+              "vecRank": 8,
+              "ftsRank": 5
+            },
+            {
+              "id": 61,
+              "title": "見落とされている指標：並行処理時に P99 はどれだけ悪化するのか？",
+              "content": "テスト条件：Cohere 10M データセット（768 次元）、16 vCPU / 64 GiB、統一 HNSW インデックスパラメータ（M=16 / ef construction=256 / ef search=200）、継続的に 500 行/秒で書き込み。",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md",
+              "score": 0.01515,
+              "vecRank": 18,
+              "ftsRank": 6
+            }
+          ]
+        },
+        {
+          "query": "how to start seekdb locally and connect a client",
+          "queryEmbedMs": 112.19999998807907,
+          "sqlMs": 4.06745800000499,
+          "e2eMs": 118.19999998807907,
+          "results": [
+            {
+              "id": 14,
+              "title": "Embedded use",
+              "content": "The binding manages a separate local seekdb process; close SQL connections before releasing its runtime handle. Save the following as example.mjs (ES modules; TypeScript declarations are also included): javascript import { seekdb } from \"@oceanbase/seekdb-node\"; import mysql from \"mysql2/promise\"; const db = await seekdb.open(\"./seekdb.db\"); let connection; try { const endpoint = db.connectionOptions(); const location = endpoint.transport === \"tcp\" ?",
+              "source": "README.md",
+              "score": 0.01639,
+              "vecRank": 1,
+              "ftsRank": 16
+            },
+            {
+              "id": 52,
+              "title": "Try It in 30 Seconds",
+              "content": "python import pyseekdb client = pyseekdb.Client(path=\"./agent state.db\") memory = client.get or create collection(name=\"episodic\")",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01639,
+              "vecRank": 11,
+              "ftsRank": 1
+            },
+            {
+              "id": 76,
+              "title": "Start and connect",
+              "content": "Choose resource values that fit the device: Forward the SQL port and connect: Inspect logs and stop the process with:",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/android.md",
+              "score": 0.01613,
+              "vecRank": 2,
+              "ftsRank": 2
+            },
+            {
+              "id": 116,
+              "title": "Framework contents",
+              "content": "- SeekDB : the engine, its Rust libraries and third-party libraries linked into one arm64 dynamic library that depends only on system libraries - Headers/seekdb.h : seekdb open , seekdb last open error , seekdb close and seekdb connection options , with the same declarations as the desktop seekdb.h - Info.plist : source revision, platform and minimum OS version - build-manifest.json , rust-Cargo.lock , and Licenses.tar : linked archive hashes, dependency source records, and license notices The device and simulator frameworks are not interchangeable.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/ios.md",
+              "score": 0.01587,
+              "vecRank": 3,
+              "ftsRank": 15
+            },
+            {
+              "id": 101,
+              "title": "Run a local instance",
+              "content": "Pass repeated --parameter key=value options to start when you need server settings. start returns after spawning the process; wait-ready checks the managed process and waits for SELECT 1 to succeed.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md",
+              "score": 0.01587,
+              "vecRank": 18,
+              "ftsRank": 3
+            },
+            {
+              "id": 70,
+              "title": "Build and run seekdb on Android",
+              "content": "Cross-compile seekdb for Android arm64-v8a on macOS, then deploy it to an emulator or physical device.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/android.md",
+              "score": 0.01563,
+              "vecRank": 4,
+              "ftsRank": 22
+            },
+            {
+              "id": 50,
+              "title": "Hybrid Retrieval in a Single SQL Statement",
+              "content": "In seekdb, that's a single SQL statement: Vector + full-text + scalar filtering are pushed down within the same execution plan — no need to assemble multiple query results on the client side.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01563,
+              "vecRank": 19,
+              "ftsRank": 4
+            },
+            {
+              "id": 94,
+              "title": "Build for another platform",
+              "content": "Use the seekdb target on every platform. Select a platform with --config=android , --config=ios , --config=ios-simulator , or --config=wasm ; without a platform configuration, the target builds the native program. Follow the Android, iOS, or WebAssembly guide to prepare dependencies. Android builds a server program, iOS builds a framework, and WebAssembly builds an engine and SQL shell.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md",
+              "score": 0.01538,
+              "vecRank": 5,
+              "ftsRank": 29
+            }
+          ]
+        },
+        {
+          "query": "incremental HNSW index memory budget",
+          "queryEmbedMs": 101.39999997615814,
+          "sqlMs": 4.551875000004657,
+          "e2eMs": 108.5,
+          "results": [
+            {
+              "id": 5,
+              "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+              "content": "Queries hit both delta and snapshot indexes with fine-grained read locks — this is why P99 stays flat under concurrency. The result: 1,523 QPS with 21.7 ms concurrent P99 — 10.7× the QPS of Milvus, and P99 jitter of just 1.1× when concurrency rises (vs ~10× for ES / Milvus on the same workload). Source: src/observer/change stream/ · src/observer/vector index/",
+              "source": "README.md",
+              "score": 0.01639,
+              "vecRank": 1,
+              "ftsRank": 15
+            },
+            {
+              "id": 43,
+              "title": "Why P99 Explodes Under Streaming Workloads",
+              "content": "Writes and index building are physically decoupled — writes are never blocked by index construction. Second, the query path always hits exactly two indexes. seekdb maintains a delta HNSW (incremental layer, receives new writes) and a snapshot HNSW (main base layer), similar to the tiered approach of an LSM-Tree.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01639,
+              "vecRank": 4,
+              "ftsRank": 1
+            },
+            {
+              "id": 3,
+              "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+              "content": "Agent workloads are continuous write + millisecond-later read. seekdb's async index pipeline (Change Stream) decouples DML from index build, and its two-level HNSW (incremental + snapshot) makes newly-written vectors immediately searchable. The write path commits and returns without waiting on index construction.",
+              "source": "README.md",
+              "score": 0.01613,
+              "vecRank": 2,
+              "ftsRank": 2
+            },
+            {
+              "id": 54,
+              "title": "Round 2: write new observation, queryable immediately after refreshing index",
+              "content": "memory.upsert(ids=[\"4\"], documents=[\"user saw pricing page 3 times today\"]) memory.refresh index() results = memory.query(query texts=\"purchase intent signals\", n results=1) print(results[\"documents\"])",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01587,
+              "vecRank": 3,
+              "ftsRank": 3
+            },
+            {
+              "id": 83,
+              "title": "Set build concurrency",
+              "content": "Bazel defaults to the available host CPU count. When you explicitly set local build concurrency, build.py sets both the job limit and the local CPU scheduling budget: -j32 , -j 32 , and --jobs=32 are equivalent. Only explicit numeric command-line values are synchronized; omitting the option preserves Bazel's automatic defaults. An explicit --local resources=cpu=N overrides this budget. Memory settings are unaffected.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md",
+              "score": 0.01563,
+              "vecRank": 32,
+              "ftsRank": 4
+            },
+            {
+              "id": 63,
+              "title": "なぜ streaming 負荷で P99 が爆発するのか",
+              "content": "Milvus、ES、Qdrant はそれぞれが得意とするシナリオ（一括インポート + 読み取り専用クエリ）では優れたパフォーマンスを発揮します——もともとそのシナリオのために設計されているからです。しかし streaming 書き込みは構造的な問題を露呈させます：新しい segment が次々と生成されるのです。クエリ時には N 個の segment それぞれに対して fanout して knn を実行し、結果をマージする必要があります。シングルスレッドであればなんとか制御可能ですが、 並行度が上がると、N 個の segment × M 個のクエリスレッドが CPU 上で互いに競合し、P99 が急上昇します。 ほとんどのベクトルデータベースでは、streaming 書き込みに伴いインデックスの segment 数が膨張し、並行クエリの競合が悪化し続けます。seekdb のインデックス数は固定です（常に 2 つだけ）ので、この問題は発生しません。 具体的には、seekdb v1.3.0 は streaming 負荷のために 2 つのメカニズムを設計しました： 第一に、書き込みパスはインデックスに触れません。 トランザクションのコミット後は redo log を書くだけで即座に返します。独立した Change Stream パイプラインがバックグラウンドで非同期に redo log を消費し、ベクトルをメモリ上の delta HNSW インデックスに書き込みます。書き込みとインデックス構築は物理的に完全に分離されており——書き込みがインデックス構築によってブロックされることはありません。",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md",
+              "score": 0.01538,
+              "vecRank": 5,
+              "ftsRank": 17
+            },
+            {
+              "id": 87,
+              "title": "Use remote C++ compilation",
+              "content": "Bazel still detects the local CPU budget automatically unless you set it separately with --local resources=cpu=N .",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md",
+              "score": 0.01538,
+              "vecRank": 13,
+              "ftsRank": 5
+            },
+            {
+              "id": 119,
+              "title": "Use it in an app",
+              "content": "/ / seekdb close releases the handle; the engine keeps running until the app exits. / seekdb close(db); } else { fprintf(stderr, \"%s\\n\", seekdb last open error()); } - Pass an absolute directory inside the app container. A new database defaults to memory budget=1G , vector memory limit=128M , log disk size=2G and datafile maxsize=20G ; key/value pairs override them when the database is created.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/ios.md",
+              "score": 0.01515,
+              "vecRank": null,
+              "ftsRank": 6
+            }
+          ]
+        }
+      ],
+      "aggregate": {
+        "queries": 5,
+        "avgQueryEmbedMs": 103.45999999046326,
+        "avgSqlMs": 4.8029914000071585,
+        "avgE2eMs": 110.33999999761582,
+        "p50SqlMs": 4.06745800000499
+      }
+    },
+    "warm": {
+      "label": "warm",
+      "device": "webgpu",
+      "stageMs": {
+        "modelLoadMs": 733.1999999880791,
+        "corpusEmbedMs": 41429.89999997616,
+        "indexWriteMs": 25.665625000023283,
+        "indexRefreshMs": 6.557417000003625,
+        "indexTotalMs": 32.22304200002691,
+        "phaseTotalMs": 42972.89999997616
+      },
+      "queries": [
+        {
+          "query": "how do I refresh a vector index",
+          "queryEmbedMs": 121.89999997615814,
+          "sqlMs": 8.521416000003228,
+          "e2eMs": 132.89999997615814,
+          "results": [
+            {
+              "id": 54,
+              "title": "Round 2: write new observation, queryable immediately after refreshing index",
+              "content": "memory.upsert(ids=[\"4\"], documents=[\"user saw pricing page 3 times today\"]) memory.refresh index() results = memory.query(query texts=\"purchase intent signals\", n results=1) print(results[\"documents\"])",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01639,
+              "vecRank": 1,
+              "ftsRank": 2
+            },
+            {
+              "id": 67,
+              "title": "-> [['user saw pricing page 3 times today']]",
+              "content": "サーバー不要、スキーマ不要、組み込みモードでプロセス内で動作します。書き込みは非同期インデックスパイプラインを通ります（サーバーモードと同じアーキテクチャ）。即座にクエリする必要がある場合は refresh index() を一度呼び出してインデックスの準備を確認してください。サーバーモードや分散モードへの切り替えは接続パラメータを 1 行変更するだけです。Cloud でインストール不要のお試しもできます（登録不要、7 日間無料、curl 一発）。",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md",
+              "score": 0.01639,
+              "vecRank": 2,
+              "ftsRank": 1
+            },
+            {
+              "id": 52,
+              "title": "Try It in 30 Seconds",
+              "content": "python import pyseekdb client = pyseekdb.Client(path=\"./agent state.db\") memory = client.get or create collection(name=\"episodic\")",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01587,
+              "vecRank": 3,
+              "ftsRank": null
+            },
+            {
+              "id": 34,
+              "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+              "content": "The real workload of an Agent is a streaming workload — most vector databases weren't designed for it. If you're choosing a vector database for your Agent, you're probably looking at ann-benchmarks or the performance comparisons published by each vendor. Those tests run a workload like this: bulk-import all the data, build the index, then run read-only queries.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01587,
+              "vecRank": 6,
+              "ftsRank": 3
+            },
+            {
+              "id": 36,
+              "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+              "content": "VectorDBBench designed its StreamingPerformanceCase specifically for this: continuous writes at a fixed rate + concurrent queries, exactly like a production Agent. VectorDBBench is maintained by Zilliz (the company behind Milvus) and is a third-party open-source benchmark framework. We used it to test 6 mainstream vector databases.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01563,
+              "vecRank": 4,
+              "ftsRank": 10
+            },
+            {
+              "id": 3,
+              "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+              "content": "Agent workloads are continuous write + millisecond-later read. seekdb's async index pipeline (Change Stream) decouples DML from index build, and its two-level HNSW (incremental + snapshot) makes newly-written vectors immediately searchable. The write path commits and returns without waiting on index construction.",
+              "source": "README.md",
+              "score": 0.01563,
+              "vecRank": 5,
+              "ftsRank": 4
+            },
+            {
+              "id": 5,
+              "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+              "content": "Queries hit both delta and snapshot indexes with fine-grained read locks — this is why P99 stays flat under concurrency. The result: 1,523 QPS with 21.7 ms concurrent P99 — 10.7× the QPS of Milvus, and P99 jitter of just 1.1× when concurrency rises (vs ~10× for ES / Milvus on the same workload). Source: src/observer/change stream/ · src/observer/vector index/",
+              "source": "README.md",
+              "score": 0.01538,
+              "vecRank": 18,
+              "ftsRank": 5
+            },
+            {
+              "id": 43,
+              "title": "Why P99 Explodes Under Streaming Workloads",
+              "content": "Writes and index building are physically decoupled — writes are never blocked by index construction. Second, the query path always hits exactly two indexes. seekdb maintains a delta HNSW (incremental layer, receives new writes) and a snapshot HNSW (main base layer), similar to the tiered approach of an LSM-Tree.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01515,
+              "vecRank": 19,
+              "ftsRank": 6
+            }
+          ]
+        },
+        {
+          "query": "fork a database to run an experiment safely",
+          "queryEmbedMs": 98,
+          "sqlMs": 4.94412500000908,
+          "e2eMs": 105.30000001192093,
+          "results": [
+            {
+              "id": 183,
+              "title": "Use the shell",
+              "content": "The database starts automatically. Once it is ready, choose Hybrid Search or Fork Table from Examples to run its SQL immediately, or enter SQL in the prompt. Hybrid Search combines full-text matching, a category filter, and vector distance. Fork Table creates a copy and shows that changes to either table do not affect the other. Each example recreates its own demo tables in playground so it can be run repeatedly.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md",
+              "score": 0.01639,
+              "vecRank": 1,
+              "ftsRank": 1
+            },
+            {
+              "id": 65,
+              "title": "Agent に必要なのは速さだけではない——「やり直し」の仕組みも必要",
+              "content": "パフォーマンスについては説明しました。しかし Agent を開発したことがある方なら、もう一つの課題をご存知でしょう：Agent は試行錯誤的にデータを変更する必要があります（memory の書き換え、実験の実行、テーブルの破壊的変更など）。 安全なサンドボックスとロールバックの仕組みが必要です。 ほとんどのベクトルデータベースにはこの概念がありません。seekdb はカーネルレベルで Copy-on-Write を実装しています： これはカーネルレベルの COW であり、アプリケーション層の snapshot/restore ではありません。fork は秒単位で完了し、データのコピーは行わず、各サンドボックスは完全に書き込み可能なデータベースです（テーブル構造、ベクトルインデックス、自動インクリメントカラムすべてが正常に動作します）。3 つのコンフリクト戦略（ FAIL / THEIRS / OURS ）により、Agent の変更をどこまで信頼するかを精密に制御できます。 FORK DATABASE と FORK TABLE の 2 つの粒度をサポートしています。",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md",
+              "score": 0.01613,
+              "vecRank": null,
+              "ftsRank": 2
+            },
+            {
+              "id": 1,
+              "title": "**Write. Search. Fork. The State Store for AI Agents.**",
+              "content": "MySQL-compatible · Embedded or Server · Hybrid Vector + Full-text Search · COW Sandbox ⚡ 1,523 QPS streaming write+search (10× Milvus, 3× Elasticsearch) 🌿 FORK/MERGE sandboxes for safe agent exploration 🔍 Vector + full-text + scalar in one SQL query 🐬 Full ACID, MySQL protocol, works with LangChain/LlamaIndex/Dify English | 中文版 | 日本語 30-Second Try · Quick Start · Embedded SDKs · Why seekdb · Ecosystem · Contributing If you find seekdb useful, consider giving it a star — it helps others discover the project.",
+              "source": "README.md",
+              "score": 0.01613,
+              "vecRank": 2,
+              "ftsRank": 20
+            },
+            {
+              "id": 150,
+              "title": "10. Validate behavior according to risk",
+              "content": "Distinguish unsupported capabilities from actual failures. Compilation alone does not prove that a migration is complete. For performance-sensitive paths, compare the baseline and new implementation with equivalent semantics and workloads. Report the results, environment, and coverage gaps. Do not hide regressions by reducing functionality.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/rust-refactoring.md",
+              "score": 0.01587,
+              "vecRank": 3,
+              "ftsRank": null
+            },
+            {
+              "id": 34,
+              "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+              "content": "The real workload of an Agent is a streaming workload — most vector databases weren't designed for it. If you're choosing a vector database for your Agent, you're probably looking at ann-benchmarks or the performance comparisons published by each vendor. Those tests run a workload like this: bulk-import all the data, build the index, then run read-only queries.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01587,
+              "vecRank": 6,
+              "ftsRank": 3
+            },
+            {
+              "id": 9,
+              "title": "🐬 MySQL-Compatible, ACID, Embeddable",
+              "content": "Built on the proven OceanBase SQL engine. Works as an embedded library, a single-node server, or in the OceanBase distributed cluster. Full ACID, real-time writes, and the entire MySQL ecosystem out of the box.",
+              "source": "README.md",
+              "score": 0.01563,
+              "vecRank": 4,
+              "ftsRank": null
+            },
+            {
+              "id": 7,
+              "title": "🌿 Copy-on-Write Sandboxes for Agent Exploration",
+              "content": "USE agent sandbox 42; INSERT INTO memory (session id, embedding, content) VALUES (...); -- Accept the work back to mainline (strategies: FAIL / THEIRS / OURS) MERGE TABLE agent sandbox 42.memory INTO agent state.memory STRATEGY THEIRS; -- ...or throw it away: DROP DATABASE agent sandbox 42; Source: tools/deploy/mysql test/test suite/fork table/",
+              "source": "README.md",
+              "score": 0.01563,
+              "vecRank": 24,
+              "ftsRank": 4
+            },
+            {
+              "id": 128,
+              "title": "Output and CI slices",
+              "content": "The runner initializes the test database and users, invokes the mysqltest binary, and exits nonzero if a case or infrastructure step fails. Results are written to --work-dir/seekdb result.json ; client logs and failure diagnostics are saved under the same work directory. Instance data is removed after the run. | Option | Meaning | | --- | --- | | --suite , --test-set | Select suites or cases; omitted means all enabled cases.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/mysqltest.md",
+              "score": 0.01538,
+              "vecRank": 5,
+              "ftsRank": 8
+            }
+          ]
+        },
+        {
+          "query": "difference between full-text search and vector search",
+          "queryEmbedMs": 118.89999997615814,
+          "sqlMs": 3.8360419999808073,
+          "e2eMs": 124.49999994039536,
+          "results": [
+            {
+              "id": 50,
+              "title": "Hybrid Retrieval in a Single SQL Statement",
+              "content": "In seekdb, that's a single SQL statement: Vector + full-text + scalar filtering are pushed down within the same execution plan — no need to assemble multiple query results on the client side.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01639,
+              "vecRank": 1,
+              "ftsRank": 3
+            },
+            {
+              "id": 1,
+              "title": "**Write. Search. Fork. The State Store for AI Agents.**",
+              "content": "MySQL-compatible · Embedded or Server · Hybrid Vector + Full-text Search · COW Sandbox ⚡ 1,523 QPS streaming write+search (10× Milvus, 3× Elasticsearch) 🌿 FORK/MERGE sandboxes for safe agent exploration 🔍 Vector + full-text + scalar in one SQL query 🐬 Full ACID, MySQL protocol, works with LangChain/LlamaIndex/Dify English | 中文版 | 日本語 30-Second Try · Quick Start · Embedded SDKs · Why seekdb · Ecosystem · Contributing If you find seekdb useful, consider giving it a star — it helps others discover the project.",
+              "source": "README.md",
+              "score": 0.01639,
+              "vecRank": 6,
+              "ftsRank": 1
+            },
+            {
+              "id": 34,
+              "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your Agent",
+              "content": "The real workload of an Agent is a streaming workload — most vector databases weren't designed for it. If you're choosing a vector database for your Agent, you're probably looking at ann-benchmarks or the performance comparisons published by each vendor. Those tests run a workload like this: bulk-import all the data, build the index, then run read-only queries.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01613,
+              "vecRank": 2,
+              "ftsRank": 10
+            },
+            {
+              "id": 27,
+              "title": "📚 Use Cases",
+              "content": "Enterprise QA, customer support, industry insights, personal knowledge bases. - 🔍 Semantic Search — embedding-based search across text, images, and other modalities. Product search, text-to-image, image-to-product. - 💻 AI-Assisted Coding — semantic code search, multi-project isolation, time-travel queries for IDE plugins and code agents.",
+              "source": "README.md",
+              "score": 0.01613,
+              "vecRank": 3,
+              "ftsRank": 2
+            },
+            {
+              "id": 183,
+              "title": "Use the shell",
+              "content": "The database starts automatically. Once it is ready, choose Hybrid Search or Fork Table from Examples to run its SQL immediately, or enter SQL in the prompt. Hybrid Search combines full-text matching, a category filter, and vector distance. Fork Table creates a copy and shows that changes to either table do not affect the other. Each example recreates its own demo tables in playground so it can be run repeatedly.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/webassembly-shell.md",
+              "score": 0.01563,
+              "vecRank": 4,
+              "ftsRank": 4
+            },
+            {
+              "id": 3,
+              "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+              "content": "Agent workloads are continuous write + millisecond-later read. seekdb's async index pipeline (Change Stream) decouples DML from index build, and its two-level HNSW (incremental + snapshot) makes newly-written vectors immediately searchable. The write path commits and returns without waiting on index construction.",
+              "source": "README.md",
+              "score": 0.01538,
+              "vecRank": 5,
+              "ftsRank": null
+            },
+            {
+              "id": 12,
+              "title": "Embedded use",
+              "content": "The context managers close the cursor and SQL connection before releasing the runtime handle: Run it; the result is [{'value': 1}] : Full usage guide · Supported platforms and requirements For a higher-level Collection API with text embedding and hybrid search, see pyseekdb.",
+              "source": "README.md",
+              "score": 0.01538,
+              "vecRank": 8,
+              "ftsRank": 5
+            },
+            {
+              "id": 61,
+              "title": "見落とされている指標：並行処理時に P99 はどれだけ悪化するのか？",
+              "content": "テスト条件：Cohere 10M データセット（768 次元）、16 vCPU / 64 GiB、統一 HNSW インデックスパラメータ（M=16 / ef construction=256 / ef search=200）、継続的に 500 行/秒で書き込み。",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md",
+              "score": 0.01515,
+              "vecRank": 18,
+              "ftsRank": 6
+            }
+          ]
+        },
+        {
+          "query": "how to start seekdb locally and connect a client",
+          "queryEmbedMs": 120.30000001192093,
+          "sqlMs": 5.330083000008017,
+          "e2eMs": 128.60000002384186,
+          "results": [
+            {
+              "id": 14,
+              "title": "Embedded use",
+              "content": "The binding manages a separate local seekdb process; close SQL connections before releasing its runtime handle. Save the following as example.mjs (ES modules; TypeScript declarations are also included): javascript import { seekdb } from \"@oceanbase/seekdb-node\"; import mysql from \"mysql2/promise\"; const db = await seekdb.open(\"./seekdb.db\"); let connection; try { const endpoint = db.connectionOptions(); const location = endpoint.transport === \"tcp\" ?",
+              "source": "README.md",
+              "score": 0.01639,
+              "vecRank": 1,
+              "ftsRank": 16
+            },
+            {
+              "id": 52,
+              "title": "Try It in 30 Seconds",
+              "content": "python import pyseekdb client = pyseekdb.Client(path=\"./agent state.db\") memory = client.get or create collection(name=\"episodic\")",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01639,
+              "vecRank": 11,
+              "ftsRank": 1
+            },
+            {
+              "id": 76,
+              "title": "Start and connect",
+              "content": "Choose resource values that fit the device: Forward the SQL port and connect: Inspect logs and stop the process with:",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/android.md",
+              "score": 0.01613,
+              "vecRank": 2,
+              "ftsRank": 2
+            },
+            {
+              "id": 116,
+              "title": "Framework contents",
+              "content": "- SeekDB : the engine, its Rust libraries and third-party libraries linked into one arm64 dynamic library that depends only on system libraries - Headers/seekdb.h : seekdb open , seekdb last open error , seekdb close and seekdb connection options , with the same declarations as the desktop seekdb.h - Info.plist : source revision, platform and minimum OS version - build-manifest.json , rust-Cargo.lock , and Licenses.tar : linked archive hashes, dependency source records, and license notices The device and simulator frameworks are not interchangeable.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/ios.md",
+              "score": 0.01587,
+              "vecRank": 3,
+              "ftsRank": 15
+            },
+            {
+              "id": 101,
+              "title": "Run a local instance",
+              "content": "Pass repeated --parameter key=value options to start when you need server settings. start returns after spawning the process; wait-ready checks the managed process and waits for SELECT 1 to succeed.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md",
+              "score": 0.01587,
+              "vecRank": 18,
+              "ftsRank": 3
+            },
+            {
+              "id": 70,
+              "title": "Build and run seekdb on Android",
+              "content": "Cross-compile seekdb for Android arm64-v8a on macOS, then deploy it to an emulator or physical device.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/android.md",
+              "score": 0.01563,
+              "vecRank": 4,
+              "ftsRank": 22
+            },
+            {
+              "id": 50,
+              "title": "Hybrid Retrieval in a Single SQL Statement",
+              "content": "In seekdb, that's a single SQL statement: Vector + full-text + scalar filtering are pushed down within the same execution plan — no need to assemble multiple query results on the client side.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01563,
+              "vecRank": 19,
+              "ftsRank": 4
+            },
+            {
+              "id": 94,
+              "title": "Build for another platform",
+              "content": "Use the seekdb target on every platform. Select a platform with --config=android , --config=ios , --config=ios-simulator , or --config=wasm ; without a platform configuration, the target builds the native program. Follow the Android, iOS, or WebAssembly guide to prepare dependencies. Android builds a server program, iOS builds a framework, and WebAssembly builds an engine and SQL shell.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md",
+              "score": 0.01538,
+              "vecRank": 5,
+              "ftsRank": 29
+            }
+          ]
+        },
+        {
+          "query": "incremental HNSW index memory budget",
+          "queryEmbedMs": 124.20000004768372,
+          "sqlMs": 4.848874999996042,
+          "e2eMs": 131.30000007152557,
+          "results": [
+            {
+              "id": 5,
+              "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+              "content": "Queries hit both delta and snapshot indexes with fine-grained read locks — this is why P99 stays flat under concurrency. The result: 1,523 QPS with 21.7 ms concurrent P99 — 10.7× the QPS of Milvus, and P99 jitter of just 1.1× when concurrency rises (vs ~10× for ES / Milvus on the same workload). Source: src/observer/change stream/ · src/observer/vector index/",
+              "source": "README.md",
+              "score": 0.01639,
+              "vecRank": 1,
+              "ftsRank": 15
+            },
+            {
+              "id": 43,
+              "title": "Why P99 Explodes Under Streaming Workloads",
+              "content": "Writes and index building are physically decoupled — writes are never blocked by index construction. Second, the query path always hits exactly two indexes. seekdb maintains a delta HNSW (incremental layer, receives new writes) and a snapshot HNSW (main base layer), similar to the tiered approach of an LSM-Tree.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01639,
+              "vecRank": 4,
+              "ftsRank": 1
+            },
+            {
+              "id": 3,
+              "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike",
+              "content": "Agent workloads are continuous write + millisecond-later read. seekdb's async index pipeline (Change Stream) decouples DML from index build, and its two-level HNSW (incremental + snapshot) makes newly-written vectors immediately searchable. The write path commits and returns without waiting on index construction.",
+              "source": "README.md",
+              "score": 0.01613,
+              "vecRank": 2,
+              "ftsRank": 2
+            },
+            {
+              "id": 54,
+              "title": "Round 2: write new observation, queryable immediately after refreshing index",
+              "content": "memory.upsert(ids=[\"4\"], documents=[\"user saw pricing page 3 times today\"]) memory.refresh index() results = memory.query(query texts=\"purchase intent signals\", n results=1) print(results[\"documents\"])",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_en.md",
+              "score": 0.01587,
+              "vecRank": 3,
+              "ftsRank": 3
+            },
+            {
+              "id": 83,
+              "title": "Set build concurrency",
+              "content": "Bazel defaults to the available host CPU count. When you explicitly set local build concurrency, build.py sets both the job limit and the local CPU scheduling budget: -j32 , -j 32 , and --jobs=32 are equivalent. Only explicit numeric command-line values are synchronized; omitting the option preserves Bazel's automatic defaults. An explicit --local resources=cpu=N overrides this budget. Memory settings are unaffected.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md",
+              "score": 0.01563,
+              "vecRank": 32,
+              "ftsRank": 4
+            },
+            {
+              "id": 63,
+              "title": "なぜ streaming 負荷で P99 が爆発するのか",
+              "content": "Milvus、ES、Qdrant はそれぞれが得意とするシナリオ（一括インポート + 読み取り専用クエリ）では優れたパフォーマンスを発揮します——もともとそのシナリオのために設計されているからです。しかし streaming 書き込みは構造的な問題を露呈させます：新しい segment が次々と生成されるのです。クエリ時には N 個の segment それぞれに対して fanout して knn を実行し、結果をマージする必要があります。シングルスレッドであればなんとか制御可能ですが、 並行度が上がると、N 個の segment × M 個のクエリスレッドが CPU 上で互いに競合し、P99 が急上昇します。 ほとんどのベクトルデータベースでは、streaming 書き込みに伴いインデックスの segment 数が膨張し、並行クエリの競合が悪化し続けます。seekdb のインデックス数は固定です（常に 2 つだけ）ので、この問題は発生しません。 具体的には、seekdb v1.3.0 は streaming 負荷のために 2 つのメカニズムを設計しました： 第一に、書き込みパスはインデックスに触れません。 トランザクションのコミット後は redo log を書くだけで即座に返します。独立した Change Stream パイプラインがバックグラウンドで非同期に redo log を消費し、ベクトルをメモリ上の delta HNSW インデックスに書き込みます。書き込みとインデックス構築は物理的に完全に分離されており——書き込みがインデックス構築によってブロックされることはありません。",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/blog/launch_blog_jp.md",
+              "score": 0.01538,
+              "vecRank": 5,
+              "ftsRank": 17
+            },
+            {
+              "id": 87,
+              "title": "Use remote C++ compilation",
+              "content": "Bazel still detects the local CPU budget automatically unless you set it separately with --local resources=cpu=N .",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/build-and-run.md",
+              "score": 0.01538,
+              "vecRank": 13,
+              "ftsRank": 5
+            },
+            {
+              "id": 119,
+              "title": "Use it in an app",
+              "content": "/ / seekdb close releases the handle; the engine keeps running until the app exits. / seekdb close(db); } else { fprintf(stderr, \"%s\\n\", seekdb last open error()); } - Pass an absolute directory inside the app container. A new database defaults to memory budget=1G , vector memory limit=128M , log disk size=2G and datafile maxsize=20G ; key/value pairs override them when the database is created.",
+              "source": "/Users/xyris/Documents/Trae-CN/temp_20261104_01/ob2026/seekdb-src/docs/developer-guide/en/ios.md",
+              "score": 0.01515,
+              "vecRank": null,
+              "ftsRank": 6
+            }
+          ]
+        }
+      ],
+      "aggregate": {
+        "queries": 5,
+        "avgQueryEmbedMs": 116.66000000238418,
+        "avgSqlMs": 5.496108199999435,
+        "avgE2eMs": 124.52000000476838,
+        "p50SqlMs": 4.94412500000908
+      }
+    }
+  },
+  "quantization": [
+    {
+      "dtype": "fp32",
+      "label": "FP32 (baseline)",
+      "file": "public/models/bge-small-en-v1.5/onnx/model.onnx",
+      "bytes": 133093490,
+      "mib": 126.93,
+      "status": "ok",
+      "loadMs": 153.1,
+      "indexEmbedMs": 509.4,
+      "msPerDoc": 5.3,
+      "queryEmbedMs": 0.9,
+      "recallAt5": 0.9615,
+      "mrrAt5": 0.8462,
+      "perQuery": [
+        {
+          "query": "how to build seekdb for iOS",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 110,
+            "title": "Build seekdb for iOS"
+          }
+        },
+        {
+          "query": "run the mysql test suite and select cases",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 128,
+            "title": "Output and CI slices"
+          }
+        },
+        {
+          "query": "use the seekdb WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 179,
+            "title": "seekdb WebAssembly shell"
+          }
+        },
+        {
+          "query": "set up homebrew mirrors for faster installs",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 108,
+            "title": "Set up Homebrew mirrors"
+          }
+        },
+        {
+          "query": "build and run seekdb on Android",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 70,
+            "title": "Build and run seekdb on Android"
+          }
+        },
+        {
+          "query": "copy-on-write sandbox for agent exploration",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 7,
+            "title": "🌿 Copy-on-Write Sandboxes for Agent Exploration"
+          }
+        },
+        {
+          "query": "hybrid retrieval in a single SQL statement",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "why does P99 spike under streaming writes",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 45,
+            "title": "Why P99 Explodes Under Streaming Workloads"
+          }
+        },
+        {
+          "query": "refresh a vector index so new writes become queryable",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 54,
+            "title": "Round 2: write new observation, queryable immediately after refreshing"
+          }
+        },
+        {
+          "query": "embed seekdb in a process without a separate server",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 14,
+            "title": "Embedded use"
+          }
+        },
+        {
+          "query": "CXX bridge between C++ and Rust",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 134,
+            "title": "2. Design native interfaces for Rust callers and use CXX for compatibi"
+          }
+        },
+        {
+          "query": "configure build concurrency for remote C++ compilation",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 85,
+            "title": "Use remote C++ compilation"
+          }
+        },
+        {
+          "query": "install the Rust toolchain on a Windows host",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 163,
+            "title": "Windows host packages"
+          }
+        },
+        {
+          "query": "package a release of the WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 199,
+            "title": "Package a release"
+          }
+        },
+        {
+          "query": "MySQL-compatible ACID embeddable database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 9,
+            "title": "🐬 MySQL-Compatible, ACID, Embeddable"
+          }
+        },
+        {
+          "query": "agents need an undo button",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 47,
+            "title": "Agents Need More Than Speed — They Need an Undo Button"
+          }
+        },
+        {
+          "query": "the wrong benchmark to choose a vector database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 34,
+            "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your "
+          }
+        },
+        {
+          "query": "add and execute a unit test",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 168,
+            "title": "Add a test"
+          }
+        },
+        {
+          "query": "ship the database inside a mobile application",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 119,
+            "title": "Use it in an app"
+          }
+        },
+        {
+          "query": "make repeated agent attempts cheap by rolling state back",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 25,
+            "title": "📚 Use Cases"
+          }
+        },
+        {
+          "query": "combine keyword matching and nearest neighbour search in one request",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "measure the latency tail when writes and reads overlap",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        },
+        {
+          "query": "avoid running a separate daemon process",
+          "hitAt5": false,
+          "rank": null,
+          "rr": 0,
+          "top1": {
+            "id": 101,
+            "title": "Run a local instance"
+          }
+        },
+        {
+          "query": "compile the engine so it runs inside a web page",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 114,
+            "title": "Build"
+          }
+        },
+        {
+          "query": "try the product in the cloud without registering",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 67,
+            "title": "-> [['user saw pricing page 3 times today']]"
+          }
+        },
+        {
+          "query": "throughput comparison against Elasticsearch and Milvus",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        }
+      ],
+      "embeddingAgreement": {
+        "meanCosineVsFp32": 1,
+        "minCosineVsFp32": 1,
+        "p05CosineVsFp32": 1
+      }
+    },
+    {
+      "dtype": "fp16",
+      "label": "FP16",
+      "file": "public/models/bge-small-en-v1.5/onnx/model_fp16.onnx",
+      "bytes": 66749212,
+      "mib": 63.66,
+      "status": "ok",
+      "loadMs": 119.6,
+      "indexEmbedMs": 746.9,
+      "msPerDoc": 7.8,
+      "queryEmbedMs": 2,
+      "recallAt5": 0.9615,
+      "mrrAt5": 0.8462,
+      "perQuery": [
+        {
+          "query": "how to build seekdb for iOS",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 110,
+            "title": "Build seekdb for iOS"
+          }
+        },
+        {
+          "query": "run the mysql test suite and select cases",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 128,
+            "title": "Output and CI slices"
+          }
+        },
+        {
+          "query": "use the seekdb WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 179,
+            "title": "seekdb WebAssembly shell"
+          }
+        },
+        {
+          "query": "set up homebrew mirrors for faster installs",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 108,
+            "title": "Set up Homebrew mirrors"
+          }
+        },
+        {
+          "query": "build and run seekdb on Android",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 70,
+            "title": "Build and run seekdb on Android"
+          }
+        },
+        {
+          "query": "copy-on-write sandbox for agent exploration",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 7,
+            "title": "🌿 Copy-on-Write Sandboxes for Agent Exploration"
+          }
+        },
+        {
+          "query": "hybrid retrieval in a single SQL statement",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "why does P99 spike under streaming writes",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 45,
+            "title": "Why P99 Explodes Under Streaming Workloads"
+          }
+        },
+        {
+          "query": "refresh a vector index so new writes become queryable",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 54,
+            "title": "Round 2: write new observation, queryable immediately after refreshing"
+          }
+        },
+        {
+          "query": "embed seekdb in a process without a separate server",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 14,
+            "title": "Embedded use"
+          }
+        },
+        {
+          "query": "CXX bridge between C++ and Rust",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 134,
+            "title": "2. Design native interfaces for Rust callers and use CXX for compatibi"
+          }
+        },
+        {
+          "query": "configure build concurrency for remote C++ compilation",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 85,
+            "title": "Use remote C++ compilation"
+          }
+        },
+        {
+          "query": "install the Rust toolchain on a Windows host",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 163,
+            "title": "Windows host packages"
+          }
+        },
+        {
+          "query": "package a release of the WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 199,
+            "title": "Package a release"
+          }
+        },
+        {
+          "query": "MySQL-compatible ACID embeddable database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 9,
+            "title": "🐬 MySQL-Compatible, ACID, Embeddable"
+          }
+        },
+        {
+          "query": "agents need an undo button",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 47,
+            "title": "Agents Need More Than Speed — They Need an Undo Button"
+          }
+        },
+        {
+          "query": "the wrong benchmark to choose a vector database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 34,
+            "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your "
+          }
+        },
+        {
+          "query": "add and execute a unit test",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 168,
+            "title": "Add a test"
+          }
+        },
+        {
+          "query": "ship the database inside a mobile application",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 119,
+            "title": "Use it in an app"
+          }
+        },
+        {
+          "query": "make repeated agent attempts cheap by rolling state back",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 25,
+            "title": "📚 Use Cases"
+          }
+        },
+        {
+          "query": "combine keyword matching and nearest neighbour search in one request",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "measure the latency tail when writes and reads overlap",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        },
+        {
+          "query": "avoid running a separate daemon process",
+          "hitAt5": false,
+          "rank": null,
+          "rr": 0,
+          "top1": {
+            "id": 101,
+            "title": "Run a local instance"
+          }
+        },
+        {
+          "query": "compile the engine so it runs inside a web page",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 114,
+            "title": "Build"
+          }
+        },
+        {
+          "query": "try the product in the cloud without registering",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 67,
+            "title": "-> [['user saw pricing page 3 times today']]"
+          }
+        },
+        {
+          "query": "throughput comparison against Elasticsearch and Milvus",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        }
+      ],
+      "embeddingAgreement": {
+        "meanCosineVsFp32": 1,
+        "minCosineVsFp32": 1,
+        "p05CosineVsFp32": 1
+      }
+    },
+    {
+      "dtype": "q8",
+      "label": "INT8 (shipped)",
+      "file": "public/models/bge-small-en-v1.5/onnx/model_quantized.onnx",
+      "bytes": 34014426,
+      "mib": 32.44,
+      "status": "ok",
+      "loadMs": 63.8,
+      "indexEmbedMs": 573.5,
+      "msPerDoc": 6,
+      "queryEmbedMs": 0.9,
+      "recallAt5": 0.9615,
+      "mrrAt5": 0.8462,
+      "perQuery": [
+        {
+          "query": "how to build seekdb for iOS",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 110,
+            "title": "Build seekdb for iOS"
+          }
+        },
+        {
+          "query": "run the mysql test suite and select cases",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 128,
+            "title": "Output and CI slices"
+          }
+        },
+        {
+          "query": "use the seekdb WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 179,
+            "title": "seekdb WebAssembly shell"
+          }
+        },
+        {
+          "query": "set up homebrew mirrors for faster installs",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 108,
+            "title": "Set up Homebrew mirrors"
+          }
+        },
+        {
+          "query": "build and run seekdb on Android",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 70,
+            "title": "Build and run seekdb on Android"
+          }
+        },
+        {
+          "query": "copy-on-write sandbox for agent exploration",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 7,
+            "title": "🌿 Copy-on-Write Sandboxes for Agent Exploration"
+          }
+        },
+        {
+          "query": "hybrid retrieval in a single SQL statement",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "why does P99 spike under streaming writes",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 45,
+            "title": "Why P99 Explodes Under Streaming Workloads"
+          }
+        },
+        {
+          "query": "refresh a vector index so new writes become queryable",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 54,
+            "title": "Round 2: write new observation, queryable immediately after refreshing"
+          }
+        },
+        {
+          "query": "embed seekdb in a process without a separate server",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 14,
+            "title": "Embedded use"
+          }
+        },
+        {
+          "query": "CXX bridge between C++ and Rust",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 134,
+            "title": "2. Design native interfaces for Rust callers and use CXX for compatibi"
+          }
+        },
+        {
+          "query": "configure build concurrency for remote C++ compilation",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 85,
+            "title": "Use remote C++ compilation"
+          }
+        },
+        {
+          "query": "install the Rust toolchain on a Windows host",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 163,
+            "title": "Windows host packages"
+          }
+        },
+        {
+          "query": "package a release of the WebAssembly shell",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 199,
+            "title": "Package a release"
+          }
+        },
+        {
+          "query": "MySQL-compatible ACID embeddable database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 9,
+            "title": "🐬 MySQL-Compatible, ACID, Embeddable"
+          }
+        },
+        {
+          "query": "agents need an undo button",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 47,
+            "title": "Agents Need More Than Speed — They Need an Undo Button"
+          }
+        },
+        {
+          "query": "the wrong benchmark to choose a vector database",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 34,
+            "title": "You're Using the Wrong Benchmark to Choose a Vector Database for Your "
+          }
+        },
+        {
+          "query": "add and execute a unit test",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 168,
+            "title": "Add a test"
+          }
+        },
+        {
+          "query": "ship the database inside a mobile application",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 119,
+            "title": "Use it in an app"
+          }
+        },
+        {
+          "query": "make repeated agent attempts cheap by rolling state back",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 25,
+            "title": "📚 Use Cases"
+          }
+        },
+        {
+          "query": "combine keyword matching and nearest neighbour search in one request",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 50,
+            "title": "Hybrid Retrieval in a Single SQL Statement"
+          }
+        },
+        {
+          "query": "measure the latency tail when writes and reads overlap",
+          "hitAt5": true,
+          "rank": 2,
+          "rr": 0.5,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        },
+        {
+          "query": "avoid running a separate daemon process",
+          "hitAt5": false,
+          "rank": null,
+          "rr": 0,
+          "top1": {
+            "id": 101,
+            "title": "Run a local instance"
+          }
+        },
+        {
+          "query": "compile the engine so it runs inside a web page",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 114,
+            "title": "Build"
+          }
+        },
+        {
+          "query": "try the product in the cloud without registering",
+          "hitAt5": true,
+          "rank": 4,
+          "rr": 0.25,
+          "top1": {
+            "id": 67,
+            "title": "-> [['user saw pricing page 3 times today']]"
+          }
+        },
+        {
+          "query": "throughput comparison against Elasticsearch and Milvus",
+          "hitAt5": true,
+          "rank": 1,
+          "rr": 1,
+          "top1": {
+            "id": 5,
+            "title": "🔥 Streaming Write + Concurrent Search, Without the P99 Spike"
+          }
+        }
+      ],
+      "embeddingAgreement": {
+        "meanCosineVsFp32": 0.99845,
+        "minCosineVsFp32": 0.996762,
+        "p05CosineVsFp32": 0.997905
+      }
+    }
+  ],
+  "artifacts": {
+    "results/submission-results.json": "written by this run",
+    "results/quantization.json": "produced by scripts/benchmark-quant.mjs"
+  },
+  "notes": [
+    "All embeddings were computed in the browser worker; the server only stores vectors and runs SQL.",
+    "Hybrid search is a single SQL statement executed by seekdb, using both the HNSW vector index and the full-text index.",
+    "Cold vs warm runs are measured on the same machine and same corpus; cold includes the first model fetch."
+  ]
+}
