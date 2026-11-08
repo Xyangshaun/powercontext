@@ -1,0 +1,138 @@
+{
+  "task": "给待办列表增加按状态筛选",
+  "recordedAt": "2026-11-08T12:10:04.867Z",
+  "context": {
+    "task": "给待办列表增加按状态筛选",
+    "specs": [
+      {
+        "source": "specs/01-列表与筛选.md",
+        "id": "01-列表与筛选",
+        "title": "待办清单 - 列表与筛选规格",
+        "summary": "- S1：列表展示全部待办，按创建顺序返回，调用方拿到的副本不应影响内部存储。 - S2：支持按状态筛选，状态只允许 `pending` 与 `done`；筛选结果保持原有创建顺序。 - S3：状态筛选必须复用同一份存储数据，不得重置或复制数据源。 - S7：同一筛选条件可重复调用，结果稳定且不改变存储内容；非法状态返回空数组而不是抛错。",
+        "distance": 0.6635832244508391
+      },
+      {
+        "source": "specs/02-计数与兼容.md",
+        "id": "02-计数与兼容",
+        "title": "待办清单 - 计数与兼容规格",
+        "summary": "- S4：`countByStatus(status)` 返回指定状态条目数，未知状态返回 0。 - S5：新增待办时未传状态默认 `pending`；`title` 为空时抛出错误。 - S6：筛选与计数不得改变既有条目字段（`id`、`title`、`status`）。",
+        "distance": 0.8847100905649884
+      }
+    ],
+    "code": [
+      {
+        "source": "demo/todo/store.mjs#listTodos",
+        "symbol": "listTodos",
+        "path": "demo/todo/store.mjs",
+        "distance": 0.7496085101095987
+      },
+      {
+        "source": "demo/todo/store.mjs#filterByStatus",
+        "symbol": "filterByStatus",
+        "path": "demo/todo/store.mjs",
+        "distance": 0.8814840892415691
+      },
+      {
+        "source": "demo/todo/store.mjs#countByStatus",
+        "symbol": "countByStatus",
+        "path": "demo/todo/store.mjs",
+        "distance": 0.9094199149085015
+      }
+    ],
+    "tests": [
+      {
+        "source": "demo/todo/tests/target.test.mjs::目标：按状态筛选只返回匹配项并保持创建顺序",
+        "name": "目标：按状态筛选只返回匹配项并保持创建顺序",
+        "path": "demo/todo/tests/target.test.mjs",
+        "distance": 0.8309087274964171
+      },
+      {
+        "source": "demo/todo/tests/regression.test.mjs::回归：列表返回全部待办且不改原对象",
+        "name": "回归：列表返回全部待办且不改原对象",
+        "path": "demo/todo/tests/regression.test.mjs",
+        "distance": 0.8540867068144118
+      },
+      {
+        "source": "demo/todo/tests/regression.test.mjs::回归：新增待办返回自增 id 且默认 pending",
+        "name": "回归：新增待办返回自增 id 且默认 pending",
+        "path": "demo/todo/tests/regression.test.mjs",
+        "distance": 0.8716174601405458
+      }
+    ],
+    "state": {
+      "scopeId": "scp_06fjv1hb9z35jjgzkgcpwr1941",
+      "state": {
+        "task": "给待办列表增加按状态筛选",
+        "done": [
+          "已把规格/代码/测试导入 seekdb"
+        ],
+        "todo": [
+          "用 MiniMax 完成 filterByStatus 实现"
+        ],
+        "verified": [
+          "seekdb 建表写入检索通过"
+        ],
+        "at": "2026-11-08T11:04:41.569Z"
+      },
+      "citation": {
+        "memory_ref": {
+          "family": "memory",
+          "artifact_id": "memory",
+          "revision": 4
+        },
+        "entry_id": "mem_ent_9b1afd737de749219c5b76dfcbe19392",
+        "entry_version_id": "mem_ver_473fb31b65404213a8a98ecf1c4a2926"
+      }
+    },
+    "generatedAt": "2026-11-08T12:10:02.667Z"
+  },
+  "endpoint": "https://api.minimaxi.com/v1/text/chatcompletion_v2",
+  "model": "MiniMax-Text-01",
+  "targetTestBefore": {
+    "passed": false,
+    "exitCode": 1
+  },
+  "targetTestAfter": {
+    "passed": true,
+    "exitCode": 0
+  },
+  "regression": {
+    "file": "demo/todo/tests/regression.test.mjs",
+    "exitCode": 0,
+    "passed": true,
+    "output": "TAP version 13\n# Subtest: 回归：新增待办返回自增 id 且默认 pending\nok 1 - 回归：新增待办返回自增 id 且默认 pending\n  ---\n  duration_ms: 0.5175\n  ...\n# Subtest: 回归：列表返回全部待办且不改原对象\nok 2 - 回归：列表返回全部待办且不改原对象\n  ---\n  duration_ms: 0.06925\n  ...\n1..2\n# tests 2\n# suites 0\n# pass 2\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 29.006125"
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "endpoint": "https://api.minimaxi.com/v1/text/chatcompletion_v2",
+      "model": "MiniMax-Text-01",
+      "requestId": "073f999b99da2d57e24adfabfcc507de",
+      "startedAt": "2026-11-08T12:10:02.721Z",
+      "latencyMs": 2038,
+      "usage": {
+        "total_tokens": 799,
+        "total_characters": 0,
+        "prompt_tokens": 748,
+        "completion_tokens": 51
+      },
+      "requestMessages": [
+        {
+          "role": "system",
+          "content": "你是资深 JavaScript 工程师，在 SDD 流程中负责实现代码。只输出一个 ```js 代码块，代码块内只包含 export function filterByStatus(status) 的完整实现，不要输出解释、不要输出其它函数。要求：返回匹配 status 的条目副本数组、保持创建顺序、不修改内部存储、状态不存在时返回空数组。"
+        },
+        {
+          "role": "user",
+          "content": "开发任务：给待办列表增加按状态筛选\n当前代码（demo/todo/store.mjs#listTodos, demo/todo/store.mjs#filterByStatus, demo/todo/store.mjs#countByStatus）：\n```js\n// 示例业务工程：待办清单（内存存储，供 SDD 模块改造与测试）\nlet seq = 0;\nconst rows = [];\n\nexport function addTodo(title, status = \"pending\") {\n  if (!title) throw new Error(\"title 必填\");\n  const item = { id: ++seq, title, status };\n  rows.push(item);\n  return { ...item };\n}\n\nexport function listTodos() {\n  return rows.map((r) => ({ ...r }));\n}\n\n// 目标功能：按状态筛选，保持创建顺序。当前未实现，目标测试应先失败。\nexport function filterByStatus(/* status */) {\n  throw new Error(\"filterByStatus 未实现\");\n}\n\nexport function countByStatus(status) {\n  return rows.filter((r) => r.status === status).length;\n}\n\n```\n适用的规格（由 seekdb 向量检索得到）：\n【规格 01-列表与筛选】待办清单 - 列表与筛选规格\n- S1：列表展示全部待办，按创建顺序返回，调用方拿到的副本不应影响内部存储。 - S2：支持按状态筛选，状态只允许 `pending` 与 `done`；筛选结果保持原有创建顺序。 - S3：状态筛选必须复用同一份存储数据，不得重置或复制数据源。 - S7：同一筛选条件可重复调用，结果稳定且不改变存储内容；非法状态返回空数组而不是抛错。\n距离=0.664\n\n【规格 02-计数与兼容】待办清单 - 计数与兼容规格\n- S4：`countByStatus(status)` 返回指定状态条目数，未知状态返回 0。 - S5：新增待办时未传状态默认 `pending`；`title` 为空时抛出错误。 - S6：筛选与计数不得改变既有条目字段（`id`、`title`、`status`）。\n距离=0.885\n目标测试（当前失败原因即 filterByStatus 未实现）：\n```js\nimport { test } from \"node:test\";\nimport assert from \"node:assert/strict\";\nimport { addTodo, filterByStatus } from \"../store.mjs\";\n\n// 目标测试：改前应因 filterByStatus 未实现而失败；改造后应全部通过。\ntest(\"目标：按状态筛选只返回匹配项并保持创建顺序\", () => {\n  addTodo(\"A-pending\", \"pending\");\n  addTodo(\"B-done\", \"done\");\n  addTodo(\"C-pending\", \"pending\");\n  const pending = filterByStatus(\"pending\");\n  assert.deepEqual(pending.map((x) => x.title).slice(-2), [\"A-pending\", \"C-pending\"]);\n  assert.equal(pending.every((x) => x.status === \"pending\"), true);\n  assert.equal(filterByStatus(\"done\").every((x) => x.status === \"done\"), true);\n});\n\n```\n请给出实现。"
+        }
+      ],
+      "responseContent": "```js\nexport function filterByStatus(status) {\n  if (status !== \"pending\" && status !== \"done\") return [];\n  return rows.filter((r) => r.status === status).map((r) => ({ ...r }));\n}\n```",
+      "extractedCode": "export function filterByStatus(status) {\n  if (status !== \"pending\" && status !== \"done\") return [];\n  return rows.filter((r) => r.status === status).map((r) => ({ ...r }));\n}"
+    }
+  ],
+  "appliedPatch": {
+    "before": "export function filterByStatus(/* status */) {\n  throw new Error(\"filterByStatus 未实现\");\n}",
+    "after": "export function filterByStatus(status) {\n  if (status !== \"pending\" && status !== \"done\") return [];\n  return rows.filter((r) => r.status === status).map((r) => ({ ...r }));\n}",
+    "changed": true
+  }
+}

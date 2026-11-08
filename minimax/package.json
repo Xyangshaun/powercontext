@@ -1,0 +1,24 @@
+{
+  "name": "minimax-sdd-context",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SDD 上下文模块：规格/代码/测试入库检索，任务状态经 PowerContext 复用",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@oceanbase/seekdb-node": "1.4.0",
+    "@oceanbase/seekdb-node-darwin-arm64": "^1.4.0",
+    "mysql2": "^3.11.5"
+  },
+  "scripts": {
+    "ingest": "node cli.mjs ingest",
+    "context": "node cli.mjs context",
+    "state:save": "node cli.mjs state-save",
+    "state:load": "node cli.mjs state-load",
+    "session": "node scripts/minimax-session.mjs",
+    "test:module": "node --test test/",
+    "test:demo": "node --test demo/todo/tests/"
+  }
+}
