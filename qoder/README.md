@@ -1,5 +1,7 @@
 # Qoder 生态题交付说明
 
+> **项目网站已通过 Qoder Sites 发布，公开可访问**：<https://powercontext-9ic1smu57sb.qoder.zone>
+
 对应赛题：`600078`（CODE 类型，20 分，除 commit/branch 外必填「作品链接」）。
 
 ## 一、交付物
@@ -26,9 +28,11 @@
    https://github.com/Xyangshaun/powercontext/tree/2026-competition-ecosystem/qoder
    ```
 
-3. **Qoder 站点分享链接**（仅当你在 Qoder 里把该 Skill 发布成站点且拿到公开地址时用）
+3. **Qoder Sites 站点（已发布，首选）**
 
-   形如 `https://<你的站点域名>`，需先确认未登录状态可访问。个人版若无分享权限，不要为此卡住提测。
+   ```
+   https://powercontext-9ic1smu57sb.qoder.zone
+   ```
 
 不要填本地路径、私有仓库地址或需要登录的链接。
 
