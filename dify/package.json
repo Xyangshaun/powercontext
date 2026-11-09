@@ -1,0 +1,14 @@
+{
+  "name": "aji-inn-dify-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "阿吉客栈·记仇掌柜 —— dify/aji-inn-chatflow.yml 的本地可运行等价复刻，用于依赖安装与运行验证",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

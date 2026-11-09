@@ -1,0 +1,13 @@
+{
+  "name": "ob2026-powercontext-ecosystem",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OceanBase 2026 数据库大赛 · PowerContext 生态赛题交付集合",
+  "scripts": {
+    "start": "node dify/server.mjs",
+    "test": "node --test dify/test/"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
