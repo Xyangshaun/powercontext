@@ -18,8 +18,8 @@ docs/           一页技术说明、验证样例、技术使用记录
 
 | 组件 | 版本 / 方式 |
 | --- | --- |
-| Node.js | 包声明 >=22；本机在 v20.19.0 实测可运行（npm 会告警 EBADENGINE），干净环境建议 22/24 |
-| seekdb | `@oceanbase/seekdb-node@1.4.0`（内嵌引擎，darwin-arm64 原生包），实测 `5.7.25-OceanBase seekdb-v1.4.0.0` |
+| Node.js | 包声明 >=22（与 seekdb 平台包一致）；评测镜像 22.23.2 实测可运行，干净环境建议 22/24 |
+| seekdb | `@oceanbase/seekdb-node@1.4.0`（内嵌引擎；平台原生包放在 `optionalDependencies`，darwin-arm64 / linux-x64 / linux-arm64 / win32-x64 按平台自动安装），实测 `5.7.25-OceanBase seekdb-v1.4.0.0` |
 | SQL 客户端 | `mysql2` |
 | PowerContext | HTTP API，默认 `http://127.0.0.1:8787`，可用 `POWERCONTEXT_URL` 覆盖 |
 
@@ -46,8 +46,8 @@ node cli.mjs ingest                  # 规格修改后重新导入，下一次 c
 ## 测试
 
 ```bash
-node --test test/                    # 模块测试（需要本机可启动 seekdb）
-node --test demo/todo/tests/         # 回归 + 目标测试；改造前目标测试应失败
+node --test test/*.test.mjs          # 模块测试（需要本机可启动 seekdb）
+node --test demo/todo/tests/*.test.mjs  # 回归 + 目标测试；改造前目标测试应失败
 ```
 
 ## MiniMax 真实开发会话
@@ -71,6 +71,6 @@ node scripts/verify-minimax.mjs     # 或 npm run probe
 
 - 检索嵌入是**本地确定性哈希嵌入**（`src/embed.mjs`，384 维），只用于 seekdb 向量召回，不是模型 embedding，也不冒充 MiniMax 能力。
 - PowerContext 不可达时 `context` 的 `state` 会返回错误字段，其余检索不受影响；`state-*` 命令需要服务在线。
-- 同一任务存有多条历史状态时，`loadState` 按 `at` 取最新一条（此前取首个命中会读到旧进展）。
+- `loadState` 同时兼容 PowerContext 1.4.0 的 `hits[].memory.text` 与旧的 `hits[].text` 结构；同一任务存有多条历史状态时按 `at` 取最新一条（此前取首个命中会读到旧进展）。
 - MiniMax 只实测了 ChatCompletion v2 非流式单轮改码；流式、函数调用、多轮长上下文**未实测**。
 - seekdb 首次初始化耗时明显；重复打开同目录会复用已有数据。

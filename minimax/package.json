@@ -5,12 +5,17 @@
   "type": "module",
   "description": "SDD 上下文模块：规格/代码/测试入库检索，任务状态经 PowerContext 复用",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
     "@oceanbase/seekdb-node": "1.4.0",
-    "@oceanbase/seekdb-node-darwin-arm64": "^1.4.0",
     "mysql2": "^3.11.5"
+  },
+  "optionalDependencies": {
+    "@oceanbase/seekdb-node-linux-x64-gnu": "1.4.0",
+    "@oceanbase/seekdb-node-linux-arm64-gnu": "1.4.0",
+    "@oceanbase/seekdb-node-darwin-arm64": "1.4.0",
+    "@oceanbase/seekdb-node-win32-x64": "1.4.0"
   },
   "scripts": {
     "ingest": "node cli.mjs ingest",
@@ -19,7 +24,7 @@
     "state:load": "node cli.mjs state-load",
     "session": "node scripts/minimax-session.mjs",
     "probe": "node scripts/verify-minimax.mjs",
-    "test:module": "node --test test/",
-    "test:demo": "node --test demo/todo/tests/"
+    "test:module": "node --test test/*.test.mjs",
+    "test:demo": "node --test demo/todo/tests/*.test.mjs"
   }
 }
