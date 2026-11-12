@@ -1,0 +1,170 @@
+{
+  "task": "单机向量索引该怎么选",
+  "recordedAt": "2026-11-12T00:17:05.056Z",
+  "ingest": {
+    "notes": 3,
+    "decisions": 2,
+    "at": "2026-11-12T00:17:04.865Z"
+  },
+  "context": {
+    "question": "单机向量索引该怎么选",
+    "notes": [
+      {
+        "source": "notes/vector-search.md",
+        "id": "vector-search",
+        "title": "向量检索的工程取舍",
+        "summary": "- HNSW 适合高维大规模召回，但构建耗时与内存占用高 - IVF 通过聚类划分候选空间，查询时只探测部分簇，延迟更可控 - 量化压缩用少量精度换取显著内存下降，适合单机部署 - 召回率与 nprobe 正相关，探测越多越准但延迟越高",
+        "distance": 0.6980599911667196
+      },
+      {
+        "source": "notes/memory-systems.md",
+        "id": "memory-systems",
+        "title": "长期记忆系统的设计",
+        "summary": "- 记忆与代码事实的边界要清楚：记忆解释动机，代码决定现状 - 写入应当带幂等键，否则重试会产生重复条目 - 检索应保留引用与版本号，便于回溯与修订 - 跨进程读回时，返回结构可能随版本变化，解析要兼容多形态",
+        "distance": 0.9133906920519449
+      },
+      {
+        "source": "notes/reading-workflow.md",
+        "id": "reading-workflow",
+        "title": "文献阅读工作流",
+        "summary": "- 先按标题和摘要粗筛，命中再读全文，避免通读所有论文 - 把每篇论文的关键结论摘成一句话，作为后续召回的锚点 - 失败的实验也要记，避免半年后重复踩同一个坑 - 引用必须能回溯到原文片段，不允许转述代替引用",
+        "distance": 0.9146424090285576
+      }
+    ],
+    "decisions": [
+      {
+        "source": "decisions/vector-index-choice.md",
+        "id": "vector-index-choice",
+        "topic": "决策：单机向量索引选型",
+        "distance": 0.6901616653816778
+      },
+      {
+        "source": "decisions/memory-write-policy.md",
+        "id": "memory-write-policy",
+        "topic": "决策：记忆写入纪律",
+        "distance": 1
+      }
+    ],
+    "memory": {
+      "available": true,
+      "scopeId": "scp_6hep8tmrhct15xs985eehzf6zx",
+      "decision": null
+    },
+    "generatedAt": "2026-11-12T00:17:04.889Z"
+  },
+  "memoryAvailable": true,
+  "calls": [
+    {
+      "step": "remember",
+      "endpoint": "http://127.0.0.1:8787/v1/memory/remember",
+      "method": "POST",
+      "scopeId": "scp_6hep8tmrhct15xs985eehzf6zx",
+      "requestId": "fd39a313a6a7ea22",
+      "latencyMs": 17,
+      "body": {
+        "scope_id": "scp_6hep8tmrhct15xs985eehzf6zx",
+        "kind": "research_decision",
+        "text": "向量索引选型\n{\"topic\":\"向量索引选型\",\"note\":\"采用 IVF 平面索引，索引只保存质心与归属，不保留全量向量\",\"at\":\"2026-11-12T00:17:04.893Z\"}"
+      },
+      "receipt": {
+        "changed": true,
+        "records": [
+          {
+            "artifact": {
+              "family": "atomic-memory",
+              "artifact_id": "art_ebab1a5676ed4aa5b664558c72d423d6",
+              "revision": 1
+            },
+            "kind": "research_decision",
+            "text": "向量索引选型\n{\"topic\":\"向量索引选型\",\"note\":\"采用 IVF 平面索引，索引只保存质心与归属，不保留全量向量\",\"at\":\"2026-11-12T00:17:04.893Z\"}",
+            "state": "active",
+            "state_version": 0,
+            "merged_into_id": null
+          }
+        ]
+      }
+    },
+    {
+      "step": "search",
+      "endpoint": "http://127.0.0.1:8787/v1/memory/search",
+      "method": "POST",
+      "scopeId": "scp_6hep8tmrhct15xs985eehzf6zx",
+      "requestId": "8c634ccb4997065d",
+      "latencyMs": 7,
+      "mode": "text",
+      "body": {
+        "scope_id": "scp_6hep8tmrhct15xs985eehzf6zx",
+        "query": "向量索引选型",
+        "limit": 10,
+        "mode": "fts"
+      },
+      "hits": [
+        {
+          "memory": {
+            "artifact": {
+              "family": "atomic-memory",
+              "artifact_id": "art_a77d3fae073c4992b2099ccc05541d1f",
+              "revision": 1
+            },
+            "kind": "research_decision",
+            "text": "向量索引选型\n{\"topic\":\"向量索引选型\",\"note\":\"采用 IVF 平面索引，索引只保存质心与归属，不保留全量向量\",\"at\":\"2026-11-11T16:22:22.548Z\"}",
+            "state": "active",
+            "state_version": 0,
+            "merged_into_id": null
+          },
+          "score": 0.01639344262295082,
+          "matched_by": [
+            "text"
+          ]
+        },
+        {
+          "memory": {
+            "artifact": {
+              "family": "atomic-memory",
+              "artifact_id": "art_ebab1a5676ed4aa5b664558c72d423d6",
+              "revision": 1
+            },
+            "kind": "research_decision",
+            "text": "向量索引选型\n{\"topic\":\"向量索引选型\",\"note\":\"采用 IVF 平面索引，索引只保存质心与归属，不保留全量向量\",\"at\":\"2026-11-12T00:17:04.893Z\"}",
+            "state": "active",
+            "state_version": 0,
+            "merged_into_id": null
+          },
+          "score": 0.016129032258064516,
+          "matched_by": [
+            "text"
+          ]
+        },
+        {
+          "memory": {
+            "artifact": {
+              "family": "atomic-memory",
+              "artifact_id": "art_ec0ad6c102de4e98a81683b57ced0765",
+              "revision": 1
+            },
+            "kind": "research_decision",
+            "text": "向量索引选型\n{\"topic\":\"向量索引选型\",\"note\":\"采用 IVF 平面索引，索引只保存质心与归属，不保留全量向量\",\"at\":\"2026-11-11T16:23:06.979Z\"}",
+            "state": "active",
+            "state_version": 0,
+            "merged_into_id": null
+          },
+          "score": 0.015873015873015872,
+          "matched_by": [
+            "text"
+          ]
+        }
+      ],
+      "decision": {
+        "topic": "向量索引选型",
+        "note": "采用 IVF 平面索引，索引只保存质心与归属，不保留全量向量",
+        "at": "2026-11-12T00:17:04.893Z"
+      }
+    }
+  ],
+  "tests": {
+    "file": "test/workbench.test.mjs",
+    "exitCode": 0,
+    "passed": true,
+    "output": "TAP version 13\n# Subtest: 嵌入确定且为 384 维\nok 1 - 嵌入确定且为 384 维\n  ---\n  duration_ms: 0.566417\n  type: 'test'\n  ...\n# Subtest: 文献与决策都被采集到，且来源文件真实存在\nok 2 - 文献与决策都被采集到，且来源文件真实存在\n  ---\n  duration_ms: 0.556042\n  type: 'test'\n  ...\n# Subtest: seekdb 建表入库后，向量检索能召回相关内容\nok 3 - seekdb 建表入库后，向量检索能召回相关内容\n  ---\n  duration_ms: 36.787458\n  type: 'test'\n  ...\n# Subtest: 决策读回兼容 PowerContext 1.4.0 的 hits[].memory.text\nok 4 - 决策读回兼容 PowerContext 1.4.0 的 hits[].memory.text\n  ---\n  duration_ms: 0.146958\n  type: 'test'\n  ...\n# Subtest: PowerContext 不可用时，召回明确降级而不中断\nok 5 - PowerContext 不可用时，召回明确降级而不中断\n  ---\n  duration_ms: 7.717541\n  type: 'test'\n  ...\n1..5\n# tests 5\n# suites 0\n# pass 5\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 106.993167"
+  }
+}

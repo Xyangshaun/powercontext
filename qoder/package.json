@@ -1,0 +1,30 @@
+{
+  "name": "qoder-lit-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "文献工作台：用 seekdb 向量检索召回个人文献笔记，用 PowerContext 跨会话记住研究决策",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@oceanbase/seekdb-node": "1.4.0",
+    "mysql2": "^3.11.5"
+  },
+  "optionalDependencies": {
+    "@oceanbase/seekdb-node-linux-x64-gnu": "1.4.0",
+    "@oceanbase/seekdb-node-linux-arm64-gnu": "1.4.0",
+    "@oceanbase/seekdb-node-darwin-arm64": "1.4.0",
+    "@oceanbase/seekdb-node-darwin-x64": "1.4.0",
+    "@oceanbase/seekdb-node-win32-x64": "1.4.0"
+  },
+  "scripts": {
+    "ingest": "node cli.mjs ingest",
+    "search": "node cli.mjs search --query",
+    "recall": "node cli.mjs recall --task",
+    "remember": "node cli.mjs remember --task --note",
+    "session": "node scripts/qoder-session.mjs",
+    "probe": "node scripts/verify-qoder.mjs",
+    "test": "node --test test/*.test.mjs"
+  }
+}
