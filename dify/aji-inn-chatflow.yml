@@ -5,19 +5,23 @@ app:
   mode: advanced-chat
   name: 阿吉客栈 · 记仇掌柜
   use_icon_as_answer_icon: false
-dependencies: []
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: powercontext/powercontext:0.0.1
 kind: app
-version: 0.3.0
+version: 0.4.0
 workflow:
   conversation_variables: []
   environment_variables:
-  - description: PowerContext 服务基地址，不含 /mcp，末尾不要加斜杠，例如 https://<your-host>
+  - description: PowerContext 服务基地址，不含 /mcp，末尾不要加斜杠。默认值是已实测可用的公网地址，也可换成你自己的部署（cloudflared tunnel --url http://127.0.0.1:8787）
     id: env-powercontext-base-url
     name: POWERCONTEXT_BASE_URL
     selector:
     - env
     - POWERCONTEXT_BASE_URL
-    value: https://<your-powercontext-host>
+    value: https://belts-accessibility-urban-internship.trycloudflare.com
   features:
     file_upload:
       allowed_file_extensions:

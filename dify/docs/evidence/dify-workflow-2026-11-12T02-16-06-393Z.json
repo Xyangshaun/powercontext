@@ -1,0 +1,305 @@
+{
+  "app": "阿吉客栈 · 记仇掌柜",
+  "dsl": "dify/aji-inn-chatflow.yml",
+  "recordedAt": "2026-11-12T02:16:06.394Z",
+  "plugin": "powercontext/powercontext:0.0.1",
+  "remote": true,
+  "steps": [
+    {
+      "node": "写入记忆",
+      "pluginTool": "powercontext.memory.remember",
+      "endpoint": "POST /v1/memory/remember",
+      "requestId": "776adce89475451e",
+      "mode": "remote",
+      "backend": "powercontext",
+      "input": "记住，我把你后厨的铜锅砸了个豁口。",
+      "output": {
+        "reply": "记下了，账本第 1 条：我把你后厨的铜锅砸了个豁口。",
+        "hits": [
+          {
+            "entry_id": "art_e4bda5a64cc641f1964f4919e07ca874",
+            "score": 1,
+            "text": "我把你后厨的铜锅砸了个豁口。"
+          }
+        ]
+      },
+      "receipt": {
+        "changed": true,
+        "records": [
+          {
+            "artifact": {
+              "family": "atomic-memory",
+              "artifact_id": "art_e4bda5a64cc641f1964f4919e07ca874",
+              "revision": 1
+            },
+            "kind": "aji_inn_debt",
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "state": "active",
+            "state_version": 0,
+            "merged_into_id": null
+          }
+        ]
+      }
+    },
+    {
+      "node": "召回记忆",
+      "pluginTool": "powercontext.memory.search",
+      "endpoint": "POST /v1/memory/search",
+      "requestId": "3340c8298d61c024",
+      "mode": "remote",
+      "backend": "powercontext",
+      "input": "掌柜的，你还记得我上次干了什么吗？",
+      "output": {
+        "reply": "翻到了 art_12b05cd04daf43348bc091de5b3f5f85：客栈账目 我把你后厨的铜锅砸了个豁口。",
+        "hits": [
+          {
+            "entry_id": "art_12b05cd04daf43348bc091de5b3f5f85",
+            "score": 0.01639344262295082,
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "citation": {
+              "memory": {
+                "artifact": {
+                  "family": "atomic-memory",
+                  "artifact_id": "art_12b05cd04daf43348bc091de5b3f5f85",
+                  "revision": 1
+                },
+                "kind": "aji_inn_debt",
+                "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+                "state": "active",
+                "state_version": 0,
+                "merged_into_id": null
+              },
+              "score": 0.01639344262295082,
+              "matched_by": [
+                "text"
+              ]
+            },
+            "matched_query": "客栈账目"
+          },
+          {
+            "entry_id": "art_5a92be6bb4c1490dbfa996fe8e671098",
+            "score": 0.016129032258064516,
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "citation": {
+              "memory": {
+                "artifact": {
+                  "family": "atomic-memory",
+                  "artifact_id": "art_5a92be6bb4c1490dbfa996fe8e671098",
+                  "revision": 1
+                },
+                "kind": "aji_inn_debt",
+                "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+                "state": "active",
+                "state_version": 0,
+                "merged_into_id": null
+              },
+              "score": 0.016129032258064516,
+              "matched_by": [
+                "text"
+              ]
+            },
+            "matched_query": "客栈账目"
+          },
+          {
+            "entry_id": "art_5aa478b3884d41a89b0c4f9e436d6f00",
+            "score": 0.015873015873015872,
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "citation": {
+              "memory": {
+                "artifact": {
+                  "family": "atomic-memory",
+                  "artifact_id": "art_5aa478b3884d41a89b0c4f9e436d6f00",
+                  "revision": 1
+                },
+                "kind": "aji_inn_debt",
+                "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+                "state": "active",
+                "state_version": 0,
+                "merged_into_id": null
+              },
+              "score": 0.015873015873015872,
+              "matched_by": [
+                "text"
+              ]
+            },
+            "matched_query": "客栈账目"
+          },
+          {
+            "entry_id": "art_5b11ca2611d240da9a16d13faacbc564",
+            "score": 0.015625,
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "citation": {
+              "memory": {
+                "artifact": {
+                  "family": "atomic-memory",
+                  "artifact_id": "art_5b11ca2611d240da9a16d13faacbc564",
+                  "revision": 1
+                },
+                "kind": "aji_inn_debt",
+                "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+                "state": "active",
+                "state_version": 0,
+                "merged_into_id": null
+              },
+              "score": 0.015625,
+              "matched_by": [
+                "text"
+              ]
+            },
+            "matched_query": "客栈账目"
+          },
+          {
+            "entry_id": "art_711f392bd854460f9e231e7c776c48d1",
+            "score": 0.015384615384615385,
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "citation": {
+              "memory": {
+                "artifact": {
+                  "family": "atomic-memory",
+                  "artifact_id": "art_711f392bd854460f9e231e7c776c48d1",
+                  "revision": 1
+                },
+                "kind": "aji_inn_debt",
+                "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+                "state": "active",
+                "state_version": 0,
+                "merged_into_id": null
+              },
+              "score": 0.015384615384615385,
+              "matched_by": [
+                "text"
+              ]
+            },
+            "matched_query": "客栈账目"
+          },
+          {
+            "entry_id": "art_74be0b48090c4bc688acea9644ffdcb6",
+            "score": 0.015151515151515152,
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "citation": {
+              "memory": {
+                "artifact": {
+                  "family": "atomic-memory",
+                  "artifact_id": "art_74be0b48090c4bc688acea9644ffdcb6",
+                  "revision": 1
+                },
+                "kind": "aji_inn_debt",
+                "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+                "state": "active",
+                "state_version": 0,
+                "merged_into_id": null
+              },
+              "score": 0.015151515151515152,
+              "matched_by": [
+                "text"
+              ]
+            },
+            "matched_query": "客栈账目"
+          },
+          {
+            "entry_id": "art_8bea77bad9114a84896432b915603008",
+            "score": 0.014925373134328358,
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "citation": {
+              "memory": {
+                "artifact": {
+                  "family": "atomic-memory",
+                  "artifact_id": "art_8bea77bad9114a84896432b915603008",
+                  "revision": 1
+                },
+                "kind": "aji_inn_debt",
+                "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+                "state": "active",
+                "state_version": 0,
+                "merged_into_id": null
+              },
+              "score": 0.014925373134328358,
+              "matched_by": [
+                "text"
+              ]
+            },
+            "matched_query": "客栈账目"
+          },
+          {
+            "entry_id": "art_9031048bf77a45788b13490272fd0ab6",
+            "score": 0.014705882352941176,
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "citation": {
+              "memory": {
+                "artifact": {
+                  "family": "atomic-memory",
+                  "artifact_id": "art_9031048bf77a45788b13490272fd0ab6",
+                  "revision": 1
+                },
+                "kind": "aji_inn_debt",
+                "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+                "state": "active",
+                "state_version": 0,
+                "merged_into_id": null
+              },
+              "score": 0.014705882352941176,
+              "matched_by": [
+                "text"
+              ]
+            },
+            "matched_query": "客栈账目"
+          },
+          {
+            "entry_id": "art_d46c4d3e1eef419b8e117280d240f202",
+            "score": 0.014492753623188406,
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "citation": {
+              "memory": {
+                "artifact": {
+                  "family": "atomic-memory",
+                  "artifact_id": "art_d46c4d3e1eef419b8e117280d240f202",
+                  "revision": 1
+                },
+                "kind": "aji_inn_debt",
+                "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+                "state": "active",
+                "state_version": 0,
+                "merged_into_id": null
+              },
+              "score": 0.014492753623188406,
+              "matched_by": [
+                "text"
+              ]
+            },
+            "matched_query": "客栈账目"
+          },
+          {
+            "entry_id": "art_dbd42da120ad4fa4b554d549ec2d4814",
+            "score": 0.014285714285714285,
+            "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+            "citation": {
+              "memory": {
+                "artifact": {
+                  "family": "atomic-memory",
+                  "artifact_id": "art_dbd42da120ad4fa4b554d549ec2d4814",
+                  "revision": 1
+                },
+                "kind": "aji_inn_debt",
+                "text": "客栈账目 我把你后厨的铜锅砸了个豁口。",
+                "state": "active",
+                "state_version": 0,
+                "merged_into_id": null
+              },
+              "score": 0.014285714285714285,
+              "matched_by": [
+                "text"
+              ]
+            },
+            "matched_query": "客栈账目"
+          }
+        ]
+      }
+    }
+  ],
+  "tests": {
+    "file": "test/dify.test.mjs",
+    "exitCode": 0,
+    "passed": true,
+    "output": "TAP version 13\n# Subtest: PowerContext 可用时，记账与翻旧账走真实后端并带回 request_id\nok 1 - PowerContext 可用时，记账与翻旧账走真实后端并带回 request_id\n  ---\n  duration_ms: 7533.321\n  type: 'test'\n  ...\n# Subtest: PowerContext 不可用时降级到真实 seekdb 账本，并给出原因\nok 2 - PowerContext 不可用时降级到真实 seekdb 账本，并给出原因\n  ---\n  duration_ms: 1466.127292\n  type: 'test'\n  ...\n# Subtest: 没说要记的句子不入账，也翻不出来\nok 3 - 没说要记的句子不入账，也翻不出来\n  ---\n  duration_ms: 0.12075\n  type: 'test'\n  ...\n# Subtest: 检索结果兼容 PowerContext 1.4.0 的 hits[].memory.text 与旧版 hits[].text\nok 4 - 检索结果兼容 PowerContext 1.4.0 的 hits[].memory.text 与旧版 hits[].text\n  ---\n  duration_ms: 0.145708\n  type: 'test'\n  ...\n1..4\n# tests 4\n# suites 0\n# pass 4\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 9080.610542"
+  }
+}
