@@ -2,12 +2,24 @@
   "name": "ob2026-powercontext-ecosystem",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "OceanBase 2026 数据库大赛 · PowerContext 生态赛题交付集合",
   "scripts": {
     "start": "node dify/server.mjs",
-    "test": "node --test dify/test/"
+    "test": "node --test dify/test/*.test.mjs"
+  },
+  "dependencies": {
+    "@oceanbase/seekdb-node": "1.4.0",
+    "mysql2": "^3.11.5"
+  },
+  "optionalDependencies": {
+    "@oceanbase/seekdb-node-linux-x64-gnu": "1.4.0",
+    "@oceanbase/seekdb-node-linux-arm64-gnu": "1.4.0",
+    "@oceanbase/seekdb-node-darwin-arm64": "1.4.0",
+    "@oceanbase/seekdb-node-darwin-x64": "1.4.0",
+    "@oceanbase/seekdb-node-win32-x64": "1.4.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

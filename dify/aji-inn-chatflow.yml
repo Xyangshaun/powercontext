@@ -21,7 +21,7 @@ workflow:
     selector:
     - env
     - POWERCONTEXT_BASE_URL
-    value: https://belts-accessibility-urban-internship.trycloudflare.com
+    value: https://truly-regional-meanwhile-nano.trycloudflare.com
   features:
     file_upload:
       allowed_file_extensions:
